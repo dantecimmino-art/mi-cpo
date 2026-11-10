@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Administración · Fixture CPO</title>
+<meta name="description" content="Administración del Fixture del CPO: ofertas, alumnos y avisos.">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface2:#F6F6FA; --ink:#0A0A0A; --muted:#4A4A4A; --line:#E6E6EE;
+  --edge:#D6D6E0; --dark:#14141F; --accent:#5B3FD9;
+  --ok:#14804A; --ok-soft:#DCF2E6; --warn:#9A5B00; --warn-soft:#FAEBCE; --bad:#B4232C; --bad-soft:#FBE3E4;
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);
+  padding:14px max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:820px;margin:0 auto}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+
+header.top{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:18px 0 22px}
+.brand{display:flex;gap:12px;align-items:center;min-width:0}
+.mark{width:40px;height:40px;border-radius:12px;background:var(--dark);color:#fff;font:700 13px var(--f-display);display:grid;place-items:center;flex:none}
+.brand b{display:block;font:700 16px var(--f-display)}
+.brand small{color:var(--muted);font-size:12.5px}
+.who{display:flex;gap:10px;align-items:center;font-size:13.5px;color:var(--muted);flex-wrap:wrap}
+h1{font:700 clamp(26px,5vw,34px)/1.08 var(--f-display);letter-spacing:-.02em;margin:0 0 6px}
+h2{font:700 19px/1.2 var(--f-display);margin:0}
+.sub{color:var(--muted);margin:0 0 22px;max-width:62ch}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;border:1.5px solid #CFCFDB;background:#fff;padding:8px 16px;font-size:14px;font-weight:500;text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:var(--dark)}
+.btn.primary{background:var(--dark);color:#fff;border-color:var(--dark);font-weight:600}
+.btn.primary:hover{background:#2A2A3A}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.big{padding:12px 22px;font-size:15px}
+
+.card{background:var(--surface);border:1.5px solid var(--edge);border-radius:24px;padding:20px 22px;margin-bottom:16px}
+.card-h{display:flex;gap:12px;align-items:baseline;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.chip{display:inline-block;font:500 12px var(--f-mono);background:var(--surface2);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+
+/* ofertas publicadas */
+.ofs{list-style:none;margin:0;padding:0}
+.ofs li{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.ofs li:first-child{border-top:0;padding-top:0}
+.ofs b{font-weight:600}
+.ofs-a{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ofs .empty b{color:var(--warn)}
+.ofs .meta{color:var(--muted);font-size:13px}
+.empty{color:var(--muted);font-size:14px;margin:0}
+
+/* carga */
+.drop{display:grid;place-items:center;text-align:center;gap:6px;border:2px dashed var(--edge);border-radius:18px;padding:34px 18px;background:var(--surface2);cursor:pointer;transition:border-color .12s,background .12s}
+.drop:hover,.drop.over{border-color:var(--dark);background:#EFEFF6}
+.drop svg{width:34px;height:34px;color:var(--muted)}
+.drop b{font:600 16px var(--f-body)}
+.drop span{color:var(--muted);font-size:13.5px}
+.drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+
+.steps{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:8px}
+.steps li{display:flex;gap:10px;align-items:center;font-size:14.5px}
+.steps .dot{width:22px;height:22px;border-radius:50%;flex:none;display:grid;place-items:center;font:600 12px var(--f-mono);background:var(--surface2);color:var(--muted);border:1.5px solid var(--edge)}
+.steps li[data-st="run"] .dot{border-color:var(--dark);color:var(--dark);animation:pulse 1s ease-in-out infinite}
+.steps li[data-st="ok"] .dot{background:var(--ok);border-color:var(--ok);color:#fff}
+.steps li[data-st="bad"] .dot{background:var(--bad);border-color:var(--bad);color:#fff}
+.steps li[data-st="wait"]{color:var(--muted)}
+.steps small{color:var(--muted);font-family:var(--f-mono);font-size:12.5px}
+@keyframes pulse{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.steps li[data-st="run"] .dot{animation:none}.drop{transition:none}}
+
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.stat{background:var(--surface2);border-radius:14px;padding:10px 12px}
+.stat b{display:block;font:700 22px/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:12.5px}
+@media (max-width:560px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pers{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+
+.box{border-radius:14px;padding:12px 14px;margin:12px 0;font-size:14px}
+.box.ok{background:var(--ok-soft);color:#0E5A34}
+.box.bad{background:var(--bad-soft);color:#7A1219}
+.box.warn{background:var(--warn-soft);color:#6B3F00}
+.box.info{background:var(--surface2);color:var(--ink)}
+.box b{font-weight:600}
+.box ul{margin:8px 0 0;padding-left:18px}
+.box li{margin:3px 0}
+details.av{margin:10px 0}
+details.av summary{cursor:pointer;color:var(--muted);font-size:14px}
+details.av ul{font-size:13.5px;color:var(--muted);margin:8px 0 0;padding-left:18px}
+.force{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin:12px 0;color:#7A1219}
+.force input{margin-top:3px;width:16px;height:16px;flex:none}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+
+.bar{height:10px;border-radius:999px;background:var(--surface2);overflow:hidden;margin:14px 0 6px}
+.bar i{display:block;height:100%;width:0;background:var(--dark);border-radius:inherit;transition:width .2s}
+.prog{color:var(--muted);font-size:13.5px}
+
+/* pestañas */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 18px;border-bottom:1.5px solid var(--line)}
+.tabs button{border:0;background:none;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-1.5px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--dark)}
+.tabs button:hover{color:var(--ink)}
+
+/* alumnos */
+#al-body h3{font:700 16px var(--f-display);margin:22px 0 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:640px){.dgrid{grid-template-columns:1fr}}
+.dgrid h3{margin-top:6px!important}
+.hbar{display:grid;grid-template-columns:minmax(0,9.5em) 1fr 2.2em;gap:8px;align-items:center;font-size:13.5px;margin:5px 0}
+.hbar span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar i{display:block;height:10px;border-radius:999px;background:var(--dark);min-width:2px}
+.hbar b{font:500 13px var(--f-mono);text-align:right}
+.buscar,.dtadd input,textarea{font:inherit;font-size:15px;background:var(--surface);color:var(--ink);border:1.5px solid var(--edge);border-radius:10px;padding:9px 11px;width:100%;min-width:0}
+.buscar{margin:0 0 10px}
+.tw{overflow-x:auto;border:1.5px solid var(--line);border-radius:14px}
+table.adm{width:100%;border-collapse:collapse;font-size:14px}
+table.adm th{text-align:left;font:600 12px var(--f-mono);color:var(--muted);background:var(--surface2);padding:8px 10px;white-space:nowrap}
+table.adm td{padding:9px 10px;border-top:1px solid var(--line);vertical-align:top}
+table.adm details summary{cursor:pointer;color:var(--muted);font-size:13px}
+table.adm details ul{margin:6px 0 0;padding-left:18px;font-size:13px}
+table.adm details .mono{color:var(--muted);font-size:12px}
+.meta{color:var(--muted);font-size:12.5px}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+
+/* avisos */
+.lbl{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
+textarea{resize:vertical}
+.fechas li span{min-width:0}
+.dtadd{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-top:12px}
+@media (max-width:560px){.dtadd{grid-template-columns:1fr}}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--dark);color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;max-width:calc(100% - 32px);z-index:10}
+
+/* ingreso */
+.center{min-height:70vh;display:grid;place-items:center}
+.login-card{width:100%;max-width:440px;border:1.5px solid var(--edge);border-radius:24px;padding:30px 26px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:48px;padding:10px 18px;border:1.5px solid var(--dark);border-radius:12px;background:#fff;font:600 15px var(--f-body)}
+.gbtn:hover{background:var(--surface2)}
+.gbtn svg{width:20px;height:20px;flex:none}
+.err{margin:14px 0 0;padding:10px 12px;border-radius:10px;background:var(--bad-soft);color:var(--bad);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="mark" aria-hidden="true">CPO</span><div><b>Fixture del CPO</b><small>Administración</small></div></div>
+    <div class="who" id="who" hidden><span id="who-name"></span><a class="btn" href="/">Ir a la app</a><button class="btn" id="logout" type="button">Salir</button></div>
+  </header>
+
+  <p id="boot" class="sub">Cargando…</p>
+
+  <!-- Sin sesión -->
+  <section class="center" id="v-login" hidden>
+    <div class="login-card">
+      <h1>Administración</h1>
+      <p class="sub">Entrá con la cuenta de Google que tiene permisos de administrador.</p>
+      <button class="gbtn" id="login" type="button">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+        <span>Continuar con Google</span>
+      </button>
+      <p class="err" id="login-err" role="alert" hidden></p>
+    </div>
+  </section>
+
+  <!-- Con sesión pero sin permisos -->
+  <section class="center" id="v-noadmin" hidden>
+    <div class="login-card">
+      <h1>Sin permisos</h1>
+      <p class="sub">La cuenta <b id="noadmin-email"></b> no es administradora del fixture. Pedile a quien administra el proyecto que te dé acceso.</p>
+      <button class="btn" id="logout2" type="button">Entrar con otra cuenta</button>
+    </div>
+  </section>
+
+  <!-- Admin -->
+  <main id="v-admin" hidden>
+    <h1>Administración</h1>
+    <nav class="tabs" role="tablist" aria-label="Secciones">
+      <button type="button" role="tab" data-tab="ofertas" aria-selected="true">Ofertas</button>
+      <button type="button" role="tab" data-tab="alumnos" aria-selected="false">Alumnos</button>
+      <button type="button" role="tab" data-tab="avisos" aria-selected="false">Avisos y fechas</button>
+    </nav>
+
+    <div id="tab-ofertas" role="tabpanel">
+    <p class="sub">Subí el PDF de oferta del período lectivo que publica la Facultad. Antes de publicarla se controla contra el reglamento (Plan 2004); los alumnos la ven al recargar la app.</p>
+
+    <section class="card" aria-labelledby="t-ofs">
+      <div class="card-h"><h2 id="t-ofs">Ofertas publicadas</h2><span class="chip" id="ofs-n"></span></div>
+      <ul class="ofs" id="ofs"><li class="empty">Cargando…</li></ul>
+    </section>
+
+    <section class="card" aria-labelledby="t-up">
+      <div class="card-h"><h2 id="t-up">Nueva oferta</h2></div>
+
+      <div id="paso-archivo">
+        <label class="drop" id="drop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M12 17v-6"/><path d="m9.5 13.5 2.5-2.5 2.5 2.5"/></svg>
+          <b>Elegí el PDF de oferta</b>
+          <span>o arrastralo acá · por ejemplo "CPO.pdf" del primer o segundo período lectivo</span>
+          <input type="file" id="file" accept="application/pdf,.pdf">
+        </label>
+      </div>
+
+      <ol class="steps" id="steps" hidden>
+        <li data-k="pdf" data-st="wait"><span class="dot">1</span><span>Leer el PDF <small data-d></small></span></li>
+        <li data-k="ref" data-st="wait"><span class="dot">2</span><span>Leer el reglamento <small data-d></small></span></li>
+        <li data-k="val" data-st="wait"><span class="dot">3</span><span>Interpretar y controlar contra el reglamento <small data-d></small></span></li>
+        <li data-k="pub" data-st="wait"><span class="dot">4</span><span>Guardar y publicar <small data-d></small></span></li>
+      </ol>
+
+      <div id="resumen" hidden></div>
+
+      <div id="progreso" hidden>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bar"><i></i></div>
+        <div class="prog" id="prog-txt" aria-live="polite"></div>
+      </div>
+
+      <div id="final" hidden></div>
+    </section>
+    </div>
+
+    <div id="tab-alumnos" role="tabpanel" hidden>
+      <p class="sub">Avance de cada alumno que entró con su cuenta: sale de <span class="mono">plans/{uid}</span> y el nombre de <span class="mono">users/{uid}</span>.</p>
+      <section class="card" aria-labelledby="t-al">
+        <div class="card-h"><h2 id="t-al">Alumnos</h2><span class="chip" id="al-n"></span></div>
+        <div class="actions" style="margin:0 0 6px">
+          <button class="btn" type="button" id="al-reload">Actualizar</button>
+          <button class="btn" type="button" id="al-csv">Descargar CSV de alumnos</button>
+          <button class="btn" type="button" id="al-csvc">Descargar cursos más elegidos</button>
+        </div>
+        <div id="al-body"><p class="empty">Cargando alumnos…</p></div>
+      </section>
+    </div>
+
+    <div id="tab-avisos" role="tabpanel" hidden>
+      <p class="sub">Lo que publiques acá lo ven todos los alumnos en la app: el aviso arriba de cada pantalla y las fechas en "Mi progreso".</p>
+      <section class="card" aria-labelledby="t-av">
+        <div class="card-h"><h2 id="t-av">Aviso general</h2></div>
+        <div id="av-actual"></div>
+        <label class="lbl" for="av-banner">Texto del aviso</label>
+        <textarea id="av-banner" rows="3" maxlength="400" placeholder="Ej.: Se abrió la inscripción al segundo período. Cierra el 20/11."></textarea>
+        <div class="actions"><button class="btn primary" type="button" id="av-pub">Publicar aviso</button><button class="btn" type="button" id="av-quitar">Quitar aviso</button></div>
+      </section>
+      <section class="card" aria-labelledby="t-fe">
+        <div class="card-h"><h2 id="t-fe">Fechas importantes</h2></div>
+        <ul class="ofs fechas" id="av-fechas"><li class="empty">Cargando…</li></ul>
+        <div class="dtadd">
+          <input id="av-dl" type="text" maxlength="80" placeholder="Ej.: Inscripción a bimestrales" aria-label="Nombre de la fecha">
+          <input id="av-dd" type="date" aria-label="Fecha">
+          <button class="btn" type="button" id="av-add">Agregar fecha</button>
+        </div>
+      </section>
+    </div>
+  </main>
+  <div class="toast" id="toast" role="status" hidden></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="/__/firebase/init.js"></script>
+<script type="module" src="/js/admin.js"></script>
+</body></html>

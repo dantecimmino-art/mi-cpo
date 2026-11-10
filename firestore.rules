@@ -1,0 +1,89 @@
+rules_version = '2';
+
+// Modelo de datos (ver docs/ARQUITECTURA.md):
+//   ofertas/{id}, ofertas/{id}/fotos/{v}  ofertas por período + foto compilada · lectura pública ·
+//                                         escritura solo Admin SDK (importar.mjs / publicar.mjs)
+//   departamentos, periodos, obligatorias, orientaciones, materiasReglamento   reglamento
+//   materias, profesores, cursos      colecciones que arman la oferta · lectura con sesión · escritura admins (Subir oferta)
+//   config/main                      avisos y fechas    · lectura pública · escritura admins
+//   plans/{uid}                      plan del alumno    · dueño + admins leen · solo el dueño escribe
+//   comments/{uid}                   comentarios        · lectura con cuenta · dueño o admin escriben
+//   users/{uid}                      perfil público     · lectura con cuenta · solo el dueño escribe
+//   admins/{uid}                     lista de admins    · cada uno lee el suyo · escritura solo consola/Admin SDK
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Ofertas por período lectivo. La app lee SIEMPRE de acá (la vigente, una sola, y su foto compilada).
+    // Lectura pública: es la oferta de la Facultad y se descarga antes del login para que la app cargue rápido.
+    // Las escriben los admins desde /3816 ("Subir oferta") o los scripts (Admin SDK).
+    match /ofertas/{id} {
+      allow read: if true;
+      allow write: if isAdmin() && id.matches('^[0-9]{4}-[12]$');
+      match /fotos/{version} {
+        allow read: if true;
+        allow write: if isAdmin() && version.matches('^v-[0-9a-f]{12}$');
+      }
+    }
+
+    // Reglamento y colecciones que arman las ofertas (fuente de verdad). Lo escriben solo los scripts del admin
+    // (Admin SDK) o la consola de Firebase; los usuarios con sesión pueden consultarlo.
+    match /departamentos/{id} { allow read: if signedIn(); allow write: if false; }
+    match /periodos/{id}      { allow read: if signedIn(); allow write: if false; }
+    match /obligatorias/{id}  { allow read: if signedIn(); allow write: if false; }
+    match /orientaciones/{id} { allow read: if signedIn(); allow write: if false; }
+    match /materiasReglamento/{id} { allow read: if signedIn(); allow write: if false; }
+    // Las arma "Subir oferta" (admins) o scripts/importar.mjs.
+    match /materias/{id}      { allow read: if signedIn(); allow write: if isAdmin(); }
+    match /profesores/{id}    { allow read: if signedIn(); allow write: if isAdmin(); }
+    match /cursos/{id}        { allow read: if signedIn(); allow write: if isAdmin(); }
+
+    // Partes del reglamento que no son una colección propia (reservadas, temáticas, deptos exigidos).
+    match /config/reglamento  { allow read: if signedIn(); allow write: if false; }
+
+    match /config/main {
+      allow read: if true;
+      allow write: if isAdmin()
+        && request.resource.data.keys().hasOnly(['banner', 'dates', 'hid'])
+        && (request.resource.data.get('dates', []) is list && request.resource.data.get('dates', []).size() <= 30)
+        && (request.resource.data.get('hid', []) is list && request.resource.data.get('hid', []).size() <= 2000);
+    }
+
+    match /plans/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly([
+             'v', 'ori', 'hist', 'sel', 'prev', 'desde', 'asked', 'fav', 'goal', 'toured',
+             'prac', 'pra', 'obl', 'idi', 't', 'rev', 'got', 'apr', 'updatedAt'])
+        && request.resource.data.sel is map
+        && request.resource.data.got is number && request.resource.data.got >= 0 && request.resource.data.got <= 200;
+      allow delete: if isOwner(uid);
+    }
+
+    match /comments/{uid} {
+      allow read: if signedIn();
+      allow write: if (isOwner(uid) || isAdmin())
+        && request.resource.data.keys().hasOnly(['items'])
+        && request.resource.data.items is list
+        && request.resource.data.items.size() <= 40;
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow write: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['name', 'updatedAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 80;
+    }
+
+    match /admins/{uid} {
+      allow read: if isOwner(uid);
+      allow write: if false;
+    }
+  }
+}

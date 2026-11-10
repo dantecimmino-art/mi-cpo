@@ -1,0 +1,21 @@
+{
+  "name": "fixture-cpo",
+  "private": true,
+  "type": "module",
+  "description": "Fixture del CPO (UBA Derecho) sobre Firebase / Google Cloud",
+  "scripts": {
+    "test": "node --test test/modelo.test.mjs test/pdf-oferta.test.mjs test/validar.test.mjs test/proceso.test.mjs",
+    "emulators": "firebase emulators:start --project demo-cpo",
+    "importar": "node scripts/importar.mjs",
+    "publicar": "node scripts/publicar.mjs",
+    "consultar": "node scripts/consultar.mjs",
+    "admin": "node scripts/set-admin.mjs --project",
+    "deploy": "firebase deploy --only hosting,firestore",
+    "deploy:rules": "firebase deploy --only firestore"
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "firebase-admin": "^12.7.0",
+    "pdfjs-dist": "^4.10.38"
+  }
+}

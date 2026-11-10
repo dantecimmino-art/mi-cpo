@@ -1,0 +1,860 @@
+{
+  "_doc": "Reglamento del CPO (Plan 2004, Res. CD 3798/04; ver data/reglamento/plan-2004.pdf). NO cambia entre cuatrimestres: cada oferta (PDF) se valida contra esto al importarla. materiasReglamento = materias que el plan exige por nombre, con sus puntos.",
+  "departamentos": [
+    {
+      "id": "PRI",
+      "nombre": "Derecho Privado",
+      "orden": 0
+    },
+    {
+      "id": "PUB",
+      "nombre": "Derecho Público",
+      "orden": 1
+    },
+    {
+      "id": "PEN",
+      "nombre": "Derecho Penal y Criminología",
+      "orden": 2
+    },
+    {
+      "id": "ECN",
+      "nombre": "Derecho Económico y Empresarial",
+      "orden": 3
+    },
+    {
+      "id": "TBJ",
+      "nombre": "Derecho del Trabajo y de la Seguridad Social",
+      "orden": 4
+    },
+    {
+      "id": "SOC",
+      "nombre": "Ciencias Sociales",
+      "orden": 5
+    },
+    {
+      "id": "FIL",
+      "nombre": "Filosofía del Derecho",
+      "orden": 6
+    },
+    {
+      "id": "PRC",
+      "nombre": "Derecho Procesal",
+      "orden": 7
+    },
+    {
+      "id": "NOT",
+      "nombre": "Notarial, Registral e Inmobiliario",
+      "orden": 8
+    },
+    {
+      "id": "TRI",
+      "nombre": "Derecho Tributario",
+      "orden": 9
+    },
+    {
+      "id": "MAR",
+      "nombre": "Procesal · Métodos alternativos",
+      "orden": 10
+    },
+    {
+      "id": "INS",
+      "nombre": "Procesal · Insolvencia",
+      "orden": 11
+    }
+  ],
+  "periodos": [
+    {
+      "id": "PCUA",
+      "nombre": "Primer cuatrimestre",
+      "nombreCorto": "1.er cuatrimestre",
+      "tipo": "cuatrimestre",
+      "semestre": 1,
+      "puntos": 4,
+      "mesInicio": 0,
+      "mesFin": 4,
+      "orden": 0
+    },
+    {
+      "id": "PBIM",
+      "nombre": "Primer bimestre",
+      "nombreCorto": "1.er bimestre",
+      "tipo": "bimestre",
+      "semestre": 1,
+      "puntos": 2,
+      "mesInicio": 0,
+      "mesFin": 2,
+      "orden": 1
+    },
+    {
+      "id": "SBIM",
+      "nombre": "Segundo bimestre",
+      "nombreCorto": "2.º bimestre",
+      "tipo": "bimestre",
+      "semestre": 1,
+      "puntos": 2,
+      "mesInicio": 2,
+      "mesFin": 4,
+      "orden": 2
+    },
+    {
+      "id": "PTRI",
+      "nombre": "Primer trimestre",
+      "nombreCorto": "1.er trimestre",
+      "tipo": "trimestre",
+      "semestre": 1,
+      "puntos": 3,
+      "mesInicio": 0,
+      "mesFin": 3,
+      "orden": 3
+    },
+    {
+      "id": "PMEN",
+      "nombre": "Primer mensual",
+      "nombreCorto": "1.er mensual",
+      "tipo": "mensual",
+      "semestre": 1,
+      "puntos": 1,
+      "mesInicio": 0,
+      "mesFin": 1,
+      "orden": 4
+    },
+    {
+      "id": "SCUA",
+      "nombre": "Segundo cuatrimestre",
+      "nombreCorto": "2.º cuatrimestre",
+      "tipo": "cuatrimestre",
+      "semestre": 2,
+      "puntos": 4,
+      "mesInicio": 0,
+      "mesFin": 4,
+      "orden": 5
+    },
+    {
+      "id": "TBIM",
+      "nombre": "Tercer bimestre",
+      "nombreCorto": "3.er bimestre",
+      "tipo": "bimestre",
+      "semestre": 2,
+      "puntos": 2,
+      "mesInicio": 0,
+      "mesFin": 2,
+      "orden": 6
+    },
+    {
+      "id": "CBIM",
+      "nombre": "Cuarto bimestre",
+      "nombreCorto": "4.º bimestre",
+      "tipo": "bimestre",
+      "semestre": 2,
+      "puntos": 2,
+      "mesInicio": 2,
+      "mesFin": 4,
+      "orden": 7
+    },
+    {
+      "id": "STRI",
+      "nombre": "Segundo trimestre",
+      "nombreCorto": "2.º trimestre",
+      "tipo": "trimestre",
+      "semestre": 2,
+      "puntos": 3,
+      "mesInicio": 0,
+      "mesFin": 3,
+      "orden": 8
+    },
+    {
+      "id": "SMEN",
+      "nombre": "Segundo mensual",
+      "nombreCorto": "2.º mensual",
+      "tipo": "mensual",
+      "semestre": 2,
+      "puntos": 1,
+      "mesInicio": 0,
+      "mesFin": 1,
+      "orden": 9
+    }
+  ],
+  "obligatorias": [
+    {
+      "id": "DIP",
+      "nombre": "Derecho Internacional Público",
+      "horas": "48 h",
+      "puntos": 4,
+      "orden": 0
+    },
+    {
+      "id": "SCC",
+      "nombre": "Sociedades Civiles y Comerciales",
+      "horas": "48 h",
+      "puntos": 4,
+      "orden": 1
+    },
+    {
+      "id": "DFS",
+      "nombre": "Derecho de Familia y Sucesiones",
+      "horas": "72 h",
+      "puntos": 6,
+      "orden": 2
+    },
+    {
+      "id": "FPT",
+      "nombre": "Finanzas Públicas y Derecho Tributario",
+      "horas": "48 h",
+      "puntos": 4,
+      "orden": 3
+    },
+    {
+      "id": "DIPR",
+      "nombre": "Derecho Internacional Privado",
+      "horas": "48 h",
+      "puntos": 4,
+      "orden": 4
+    }
+  ],
+  "orientaciones": [
+    {
+      "id": "adm",
+      "nombre": "Público · Administrativo",
+      "principales": [
+        "PUB-631",
+        "PUB-604",
+        "PUB-6X5",
+        "PUB-6X4",
+        "PUB-6X6"
+      ],
+      "gruposElegirUno": [
+        {
+          "materias": [
+            "PUB-6X7",
+            "PUB-6X8"
+          ]
+        }
+      ],
+      "deptosDerivados": [
+        "PUB"
+      ],
+      "deptosLibres": [
+        "TBJ",
+        "PRI",
+        "PEN",
+        "ECN"
+      ],
+      "constitucional": [
+        "PUB-603",
+        "PUB-651"
+      ],
+      "orden": 0
+    },
+    {
+      "id": "dip",
+      "nombre": "Público · Internacional Público",
+      "principales": [
+        "PUB-6X1",
+        "PUB-6X2",
+        "PUB-6X3"
+      ],
+      "gruposElegirUno": [],
+      "deptosDerivados": [
+        "PUB"
+      ],
+      "deptosLibres": [
+        "TBJ",
+        "PRI",
+        "PEN",
+        "ECN"
+      ],
+      "constitucional": [
+        "PUB-603",
+        "PUB-651"
+      ],
+      "orden": 1
+    },
+    {
+      "id": "pri",
+      "nombre": "Privado",
+      "principales": [
+        "PRI-205",
+        "PRI-2X7",
+        "PRI-2X8"
+      ],
+      "gruposElegirUno": [],
+      "deptosDerivados": [
+        "PRI",
+        "NOT"
+      ],
+      "deptosLibres": [
+        "PUB",
+        "ECN",
+        "PEN",
+        "TBJ"
+      ],
+      "constitucional": [
+        "PUB-628"
+      ],
+      "orden": 2
+    },
+    {
+      "id": "not",
+      "nombre": "Notarial, Registral e Inmobiliario",
+      "principales": [
+        "NOT-263",
+        "NOT-2X5",
+        "NOT-2X6"
+      ],
+      "gruposElegirUno": [],
+      "deptosDerivados": [
+        "NOT"
+      ],
+      "deptosLibres": [
+        "PUB",
+        "ECN",
+        "TBJ",
+        "PEN"
+      ],
+      "constitucional": [
+        "PUB-628"
+      ],
+      "orden": 3
+    },
+    {
+      "id": "emp",
+      "nombre": "Empresarial",
+      "principales": [
+        "ECN-6X9",
+        "ECN-7X3"
+      ],
+      "gruposElegirUno": [
+        {
+          "materias": [
+            "ECN-5X3",
+            "ECN-5X4",
+            "ECN-5X5"
+          ]
+        }
+      ],
+      "deptosDerivados": [
+        "ECN"
+      ],
+      "deptosLibres": [
+        "PUB",
+        "PRI",
+        "PEN",
+        "TBJ"
+      ],
+      "constitucional": [
+        "PUB-602"
+      ],
+      "orden": 4
+    },
+    {
+      "id": "tri",
+      "nombre": "Tributario",
+      "principales": [
+        "TRI-2X2",
+        "TRI-2X3",
+        "TRI-2X4"
+      ],
+      "gruposElegirUno": [],
+      "deptosDerivados": [
+        "TRI"
+      ],
+      "deptosLibres": [
+        "PUB",
+        "PRI",
+        "PEN",
+        "TBJ"
+      ],
+      "constitucional": [
+        "PUB-602"
+      ],
+      "orden": 5
+    },
+    {
+      "id": "pen",
+      "nombre": "Penal",
+      "principales": [
+        "PEN-4X8",
+        "PEN-405"
+      ],
+      "gruposElegirUno": [
+        {
+          "materias": [
+            "PEN-5X6",
+            "PEN-5X7"
+          ]
+        }
+      ],
+      "deptosDerivados": [
+        "PEN"
+      ],
+      "deptosLibres": [
+        "PUB",
+        "PRI",
+        "TBJ",
+        "ECN"
+      ],
+      "constitucional": [
+        "PUB-632"
+      ],
+      "orden": 6
+    },
+    {
+      "id": "tbj",
+      "nombre": "Trabajo y Seguridad Social",
+      "principales": [
+        "TBJ-5X1",
+        "TBJ-501",
+        "TBJ-5X2"
+      ],
+      "gruposElegirUno": [],
+      "deptosDerivados": [
+        "TBJ"
+      ],
+      "deptosLibres": [
+        "PUB",
+        "PRI",
+        "PEN",
+        "ECN"
+      ],
+      "constitucional": [
+        "PUB-627"
+      ],
+      "orden": 7
+    }
+  ],
+  "materiasReglamento": [
+    {
+      "id": "PUB-631",
+      "nombre": "Contratos Administrativos",
+      "puntos": 3,
+      "rol": "principal",
+      "orientaciones": [
+        "adm"
+      ],
+      "orden": 0
+    },
+    {
+      "id": "PUB-604",
+      "nombre": "Procedimiento y Recursos Administrativos",
+      "puntos": 2,
+      "rol": "principal",
+      "orientaciones": [
+        "adm"
+      ],
+      "orden": 1
+    },
+    {
+      "id": "PUB-6X5",
+      "nombre": "Derecho Procesal Administrativo",
+      "puntos": 2,
+      "rol": "principal",
+      "orientaciones": [
+        "adm"
+      ],
+      "orden": 2
+    },
+    {
+      "id": "PUB-6X4",
+      "nombre": "Responsabilidad del Estado",
+      "puntos": 2,
+      "rol": "principal",
+      "orientaciones": [
+        "adm"
+      ],
+      "orden": 3
+    },
+    {
+      "id": "PUB-6X6",
+      "nombre": "Potestad Reglamentaria y Regulación",
+      "puntos": 2,
+      "rol": "principal",
+      "orientaciones": [
+        "adm"
+      ],
+      "orden": 4
+    },
+    {
+      "id": "PUB-6X7",
+      "nombre": "Organización Administrativa",
+      "puntos": 1,
+      "rol": "elegir-uno",
+      "orientaciones": [
+        "adm"
+      ],
+      "orden": 5
+    },
+    {
+      "id": "PUB-6X8",
+      "nombre": "Las Bases del Derecho Administrativo",
+      "puntos": 1,
+      "rol": "elegir-uno",
+      "orientaciones": [
+        "adm"
+      ],
+      "orden": 6
+    },
+    {
+      "id": "PUB-6X1",
+      "nombre": "Las Fuentes del Derecho Internacional",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "dip"
+      ],
+      "orden": 7
+    },
+    {
+      "id": "PUB-6X2",
+      "nombre": "Sujetos y Jurisdicciones",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "dip"
+      ],
+      "orden": 8
+    },
+    {
+      "id": "PUB-6X3",
+      "nombre": "Derecho Internacional de los Derechos Humanos",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "dip"
+      ],
+      "orden": 9
+    },
+    {
+      "id": "PRI-205",
+      "nombre": "Derecho Romano",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "pri"
+      ],
+      "orden": 10
+    },
+    {
+      "id": "PRI-2X7",
+      "nombre": "Derecho del Consumidor",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "pri"
+      ],
+      "orden": 11
+    },
+    {
+      "id": "PRI-2X8",
+      "nombre": "Derecho de Daños",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "pri"
+      ],
+      "orden": 12
+    },
+    {
+      "id": "NOT-263",
+      "nombre": "Derecho Notarial",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "not"
+      ],
+      "orden": 13
+    },
+    {
+      "id": "NOT-2X5",
+      "nombre": "Derecho Registral",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "not"
+      ],
+      "orden": 14
+    },
+    {
+      "id": "NOT-2X6",
+      "nombre": "Derecho Inmobiliario",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "not"
+      ],
+      "orden": 15
+    },
+    {
+      "id": "ECN-6X9",
+      "nombre": "Institutos de Derecho de la Navegación por Agua y por Aire",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "emp"
+      ],
+      "orden": 16
+    },
+    {
+      "id": "ECN-7X3",
+      "nombre": "Derecho de los Recursos Naturales y Protección del Medio Ambiente",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "emp"
+      ],
+      "orden": 17
+    },
+    {
+      "id": "ECN-5X3",
+      "nombre": "Contratación Mercantil",
+      "puntos": 4,
+      "rol": "elegir-uno",
+      "orientaciones": [
+        "emp"
+      ],
+      "orden": 18
+    },
+    {
+      "id": "ECN-5X4",
+      "nombre": "Títulos de Crédito, Mercado Financiero y de Capitales",
+      "puntos": 4,
+      "rol": "elegir-uno",
+      "orientaciones": [
+        "emp"
+      ],
+      "orden": 19
+    },
+    {
+      "id": "ECN-5X5",
+      "nombre": "Propiedad Industrial, Mercado y Derecho de la Competencia",
+      "puntos": 4,
+      "rol": "elegir-uno",
+      "orientaciones": [
+        "emp"
+      ],
+      "orden": 20
+    },
+    {
+      "id": "TRI-2X2",
+      "nombre": "Teoría General del Derecho Tributario",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "tri"
+      ],
+      "orden": 21
+    },
+    {
+      "id": "TRI-2X3",
+      "nombre": "Régimen Tributario Argentino",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "tri"
+      ],
+      "orden": 22
+    },
+    {
+      "id": "TRI-2X4",
+      "nombre": "Procedimientos y Procesos Tributarios",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "tri"
+      ],
+      "orden": 23
+    },
+    {
+      "id": "PEN-4X8",
+      "nombre": "Teoría del Delito y Sistema de la Pena",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "pen"
+      ],
+      "orden": 24
+    },
+    {
+      "id": "PEN-405",
+      "nombre": "Régimen del Proceso Penal",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "pen"
+      ],
+      "orden": 25
+    },
+    {
+      "id": "PEN-5X6",
+      "nombre": "Criminología",
+      "puntos": 4,
+      "rol": "elegir-uno",
+      "orientaciones": [
+        "pen"
+      ],
+      "orden": 26
+    },
+    {
+      "id": "PEN-5X7",
+      "nombre": "Parte Especial del Derecho Penal",
+      "puntos": 4,
+      "rol": "elegir-uno",
+      "orientaciones": [
+        "pen"
+      ],
+      "orden": 27
+    },
+    {
+      "id": "PEN-5X8",
+      "nombre": "Introducción a las Teorías Criminológicas",
+      "puntos": 2,
+      "rol": "derivado-obligatorio",
+      "orientaciones": [
+        "pen"
+      ],
+      "orden": 28
+    },
+    {
+      "id": "PEN-5X9",
+      "nombre": "Introducción a la Parte Especial del Derecho Penal",
+      "puntos": 2,
+      "rol": "derivado-obligatorio",
+      "orientaciones": [
+        "pen"
+      ],
+      "orden": 29
+    },
+    {
+      "id": "TBJ-5X1",
+      "nombre": "Teoría General del Derecho del Trabajo",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "tbj"
+      ],
+      "orden": 30
+    },
+    {
+      "id": "TBJ-501",
+      "nombre": "Derecho de las Relaciones Individuales de Trabajo",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "tbj"
+      ],
+      "orden": 31
+    },
+    {
+      "id": "TBJ-5X2",
+      "nombre": "Derecho de las Relaciones Colectivas de Trabajo",
+      "puntos": 4,
+      "rol": "principal",
+      "orientaciones": [
+        "tbj"
+      ],
+      "orden": 32
+    },
+    {
+      "id": "TBJ-512",
+      "nombre": "Derecho de la Seguridad Social",
+      "puntos": 4,
+      "rol": "derivado-obligatorio",
+      "orientaciones": [
+        "tbj"
+      ],
+      "orden": 33
+    },
+    {
+      "id": "PUB-603",
+      "nombre": "Derecho Constitucional Profundizado",
+      "puntos": 4,
+      "rol": "constitucional",
+      "orientaciones": [
+        "adm",
+        "dip"
+      ],
+      "orden": 34
+    },
+    {
+      "id": "PUB-651",
+      "nombre": "Derecho Constitucional Profundizado y Procesal Constitucional",
+      "puntos": 4,
+      "rol": "constitucional",
+      "orientaciones": [
+        "adm",
+        "dip"
+      ],
+      "orden": 35
+    },
+    {
+      "id": "PUB-628",
+      "nombre": "Bases Constitucionales del Derecho Privado",
+      "puntos": 4,
+      "rol": "constitucional",
+      "orientaciones": [
+        "pri",
+        "not"
+      ],
+      "orden": 36
+    },
+    {
+      "id": "PUB-602",
+      "nombre": "Derecho Constitucional Económico",
+      "puntos": 4,
+      "rol": "constitucional",
+      "orientaciones": [
+        "emp",
+        "tri"
+      ],
+      "orden": 37
+    },
+    {
+      "id": "PUB-632",
+      "nombre": "Garantías Constitucionales del Derecho Penal Sustantivo y del Proceso Penal",
+      "puntos": 4,
+      "rol": "constitucional",
+      "orientaciones": [
+        "pen"
+      ],
+      "orden": 38
+    },
+    {
+      "id": "PUB-627",
+      "nombre": "Constitucionalismo Social",
+      "puntos": 4,
+      "rol": "constitucional",
+      "orientaciones": [
+        "tbj"
+      ],
+      "orden": 39
+    },
+    {
+      "id": "PUB-66U",
+      "nombre": "Derecho de la Integración",
+      "puntos": 4,
+      "rol": "comun",
+      "orientaciones": [],
+      "orden": 40
+    }
+  ],
+  "materiasReservadas": [
+    "PUB-66U",
+    "PUB-603",
+    "PUB-651",
+    "PUB-628",
+    "PUB-602",
+    "PUB-627",
+    "PUB-632"
+  ],
+  "temaClave": {
+    "ECN-5X3": "CONTRATACIÓN MERCANTIL",
+    "ECN-5X4": "TÍTULOS DE CRÉDITO, MERCADO FINANCIERO Y DE CAPITALES",
+    "ECN-5X5": "PROPIEDAD INDUSTRIAL, MERCADO Y DERECHO DE LA COMPETENCIA"
+  },
+  "departamentosRequeridos": [
+    "SOC",
+    "FIL",
+    "PRC",
+    "MAR",
+    "INS"
+  ]
+}

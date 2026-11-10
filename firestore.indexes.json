@@ -1,0 +1,164 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "cursos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ofertaId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "departamentoId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "materiaNombre",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "cursos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ofertaId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "departamentoId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "periodoId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "materiaNombre",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "cursos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ofertaId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dias",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "periodoId",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "cursos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ofertaId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "materiaId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "periodoId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "comision",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "cursos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ofertaId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "profesorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "periodoId",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "cursos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ofertaId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "turnos",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "periodoId",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "materias",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "ofertas",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "departamentoId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "nombre",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "cursos",
+      "fieldPath": "horario",
+      "ttl": false,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "cursos",
+      "fieldPath": "horarioTexto",
+      "ttl": false,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "fotos",
+      "fieldPath": "json",
+      "indexes": []
+    }
+  ]
+}
