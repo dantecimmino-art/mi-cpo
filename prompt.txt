@@ -1,0 +1,21 @@
+Vas a continuar el proyecto "Fixture del CPO" (app para alumnos de Abogacía UBA, Plan 2004),
+publicado en https://mi-cpo.web.app sobre Firebase (proyecto mi-cpo, plan Spark).
+Hablame siempre en español rioplatense.
+
+1. Si todavía no está clonado: git clone https://github.com/dantecimmino-art/mi-cpo.git y entrá a la carpeta.
+2. Leé ENTERO MEMORY.md antes de hacer cualquier cosa. Ahí está todo: cuentas, instalación,
+   arquitectura, modelo de datos de Firestore, flujos, estado de producción, decisiones y pendientes.
+   CLAUDE.md resume las reglas que no se pueden romper.
+3. Verificá el entorno con la sección "2.b Instalación en una PC nueva" de MEMORY.md: decime qué
+   programas faltan (Git, Node 22, Firebase CLI, gcloud, etc.) y guiame para instalarlos y loguearme
+   (firebase login y gcloud auth application-default login con una cuenta con acceso a mi-cpo).
+4. Corré npm install y npm test (tienen que pasar 24 tests) y probá
+   npm run consultar -- --project mi-cpo orientacion pri para confirmar que llegás a Firestore.
+5. Contame en pocas líneas qué entendiste del proyecto (qué hace la app, cómo se sube una oferta,
+   dónde se guarda el progreso de los alumnos y qué está en producción hoy) y qué pendientes ves.
+   No cambies nada de producción hasta que te lo pida.
+
+Reglas clave: el reglamento del Plan 2004 no cambia y toda oferta se valida contra él; hay una sola
+oferta vigente; nunca editar las fotos de ofertas a mano; el admin está en /3816; si agregás un campo
+al plan del alumno, actualizá firestore.rules; después de cada deploy verificá en producción;
+al terminar cada cambio importante, actualizá MEMORY.md y hacé commit.
