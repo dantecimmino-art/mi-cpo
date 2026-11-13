@@ -167,9 +167,11 @@ function getBlocks(){
     rule:'<b>4 puntos</b> a elección libre entre los cursos del Departamento. No se pueden cursar más puntos que esos 4.', dept:'Departamento de Filosofía del Derecho'});
   B.push({id:'pr', name:'Derecho Procesal', short:'Procesal', cap:6, grp:'Fuera de la orientación', eligible:DATA.filter(c=>['PRC','MAR','INS'].includes(c.dep)), slots:[
       {id:'m', label:'Métodos alternativos de resolución de conflictos', cap:2, req:true, accept:c=>c.dep==='MAR'},
-      {id:'i', label:'Prevención y resolución de la insolvencia', cap:2, req:true, accept:c=>c.dep==='INS'},
+      // Tributario (pedido de la Secretaría, nov-2026): esos 2 puntos tienen que ser en Concursos (INS-968).
+      S.ori==='tri' ? {id:'i', label:'Concursos', cap:2, req:true, accept:esConcursos}
+                    : {id:'i', label:'Prevención y resolución de la insolvencia', cap:2, req:true, accept:c=>c.dep==='INS'},
       {id:'a', label:'Otro curso de Procesal', cap:2, accept:c=>c.dep==='PRC'}],
-    rule:'<b>6 puntos</b> en Derecho Procesal: <b>2 en Métodos alternativos</b>, <b>2 en Procedimientos de prevención y resolución de la insolvencia</b> y 2 en otro curso del Departamento. No se pueden cursar más.', dept:'Departamento de Derecho Procesal'});
+    rule:'<b>6 puntos</b> en Derecho Procesal: <b>2 en Métodos alternativos</b>, <b>2 en '+(S.ori==='tri' ? 'Concursos' : 'Procedimientos de prevención y resolución de la insolvencia')+'</b> y 2 en otro curso del Departamento. No se pueden cursar más.', dept:'Departamento de Derecho Procesal'});
   B.push({id:'pp', name:'Práctica Profesional', short:'Práctica', cap:19, grp:'Carga manual', manual:'prac', rule:'<b>19 puntos</b> en el Departamento de Práctica Profesional. Esa oferta no está en el archivo que cargaste, así que sumá acá los puntos que ya tenés o vas a cursar.', dept:'Departamento de Práctica Profesional'});
   B.push({id:'ob', name:'Obligatorias del CPO', short:'Obligatorias', cap:22, grp:'Carga manual', manual:'obl', outside:true, rule:'Cinco asignaturas cuatrimestrales obligatorias para todas las orientaciones. No suman a los 69 puntos: se cuentan aparte (22 puntos).', dept:'Obligatorias de todas las orientaciones'});
   B.push({id:'id', name:'Lecto-comprensión', short:'Idioma', cap:1, grp:'Carga manual', manual:'idi', outside:true, rule:'Un curso cuatrimestral de lecto-comprensión de textos jurídicos en lengua extranjera. Para inscribirte tenés que tener aprobado el CPC y al menos tres obligatorias del CPO.', dept:'Lengua extranjera'});
@@ -189,7 +191,9 @@ const prevVisible = x => !SPEC.has(x.b) || x.ori===S.ori;
 const prevOf = bid => S.prev.filter(x => x.b===bid && prevVisible(x));
 const prevPts = bid => prevOf(bid).reduce((s,x)=>s+x.pts, 0);
 const prevHas = k => S.prev.some(x => x.k===k && prevVisible(x));
-const prevCourse = x => ({key:x.k||'', dep:x.dep||'', tema:x.tm||[]});
+const prevCourse = x => ({key:x.k||'', dep:x.dep||'', tema:x.tm||[], name:x.name||''});
+// "Concursos" del área de Insolvencia de Procesal (968). Si la Facultad le cambia el código, se reconoce por el nombre.
+const esConcursos = c => c.key==='INS-968' || (c.dep==='INS' && nnOf(c.name)==='concursos');
 const nnOf = n => String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
 // Materia anterior que es el mismo curso (mismo código o mismo nombre).
 const prevSame = c => S.prev.find(x => prevVisible(x) && (x.k===c.key || nnOf(x.name)===c.nn));

@@ -1,7 +1,7 @@
 # MEMORY.md — Fixture del CPO (mi-cpo)
 
 Memoria completa del proyecto para retomarlo desde otra PC / otra instancia de Claude Code sin
-contexto previo. Leela entera antes de tocar nada. Última actualización: 10/11/2026.
+contexto previo. Leela entera antes de tocar nada. Última actualización: 13/11/2026.
 
 ---
 
@@ -77,7 +77,7 @@ git --version && node --version && npm --version && firebase --version && gcloud
 git clone https://github.com/dantecimmino-art/mi-cpo.git
 cd mi-cpo
 npm install          # firebase-admin, pdfjs-dist 4.10.38, cross-env (devDependencies)
-npm test             # tienen que pasar los 24 tests
+npm test             # tienen que pasar los 25 tests
 ```
 (Si no instalaste firebase-tools global, `npx firebase ...` también funciona.)
 
@@ -129,7 +129,7 @@ se **valida contra el reglamento** antes de publicarse (`public/js/oferta/valida
 | Integración (`in`) | 4 | PUB-66U |
 | Ciencias Sociales (`so`) | 4 | depto SOC |
 | Filosofía (`fi`) | 4 | depto FIL |
-| Procesal (`pr`) | 6 | 2 en Métodos alternativos (MAR) + 2 en Insolvencia (INS) + 2 en otro de PRC |
+| Procesal (`pr`) | 6 | 2 en Métodos alternativos (MAR) + 2 en Insolvencia (INS) + 2 en otro de PRC. **Excepción Tributario** (pedido del usuario, 13/11/2026): los 2 de Insolvencia tienen que ser **Concursos (INS-968)** → ranura "Concursos" (`esConcursos` en app.js) y `materiasReglamento/INS-968` rol `procesal-obligatorio` |
 | Práctica Profesional (`pp`) | 19 | carga manual (no está en el PDF) |
 | Obligatorias (`ob`) | 22 aparte | 5 cuatrimestrales: DIP, SCC, DFS, FPT, DIPR (no suman a los 69) |
 | Idioma (`id`) | aparte | lecto-comprensión |
@@ -186,7 +186,7 @@ scripts/*.mjs (Node, Admin SDK) ──► mismo proceso que /3816 desde la termi
 | `scripts/set-admin.mjs` | da/quita admin por email |
 | `data/referencia.json` | reglamento Plan 2004 modelado (fuente para `--reglamento`) |
 | `data/ofertas/*.pdf/json` | PDFs de oferta y su versión cruda (2025-1, 2026-1; 2026-2 sale del fixture legacy, no hay PDF) |
-| `test/*.test.mjs` | `npm test` (node --test): 24 tests, incluye PDF real → JSON y foto admin == foto CLI |
+| `test/*.test.mjs` | `npm test` (node --test): 25 tests, incluye PDF real → JSON y foto admin == foto CLI |
 | `firestore.rules`, `firestore.indexes.json`, `firebase.json` | reglas, índices, hosting/headers |
 | `docs/ARQUITECTURA.md`, `README.md` | documentación (más corta que este archivo) |
 
@@ -199,7 +199,7 @@ scripts/*.mjs (Node, Admin SDK) ──► mismo proceso que /3816 desde la termi
 - `periodos/{PCUA…}` `{nombre, nombreCorto, tipo, semestre, puntos, mesInicio, mesFin, orden}`
 - `obligatorias/{DIP…}` `{nombre, horas, puntos, orden}`
 - `orientaciones/{pri…}` `{nombre, principales[], gruposElegirUno[[]], deptosDerivados[], deptosLibres[], constitucional[], orden}`
-- `materiasReglamento/{PRI-205…}` `{nombre, puntos, rol: principal|elegir-uno|derivado-obligatorio|constitucional|comun, orientaciones[], orden}` (41)
+- `materiasReglamento/{PRI-205…}` `{nombre, puntos, rol: principal|elegir-uno|derivado-obligatorio|constitucional|comun|procesal-obligatorio, orientaciones[], orden}` (42; INS-968 Concursos es `procesal-obligatorio` de `tri`)
 - `config/reglamento` `{materiasReservadas, temaClave, departamentosRequeridos}`
 
 Para ver las obligatorias de una orientación: `orientaciones/{id}.principales` + `materiasReglamento`
@@ -301,6 +301,11 @@ Título: "PRIMER PERÍODO LECTIVO 2026 - CPO". Actividad: `205 (PRI) - DERECHO R
 - **Filas sin bordes**: a veces la última fila de una página no tiene bordes; si un renglón suelto
   empieza con un período ("SEGUNDO BIMESTRE ..."), se reparte en las columnas de la tabla más cercana.
 - `INTDP` a veces viene sin guion bajo (`... HUMANOS INTDP`): se acepta `(_|\s)INTDP`.
+- **Títulos de Procesal cruzados**: el PDF de 2025-1 tiene al revés los títulos "Métodos alternativos" e
+  "Insolvencia". Si el nombre de la materia es claramente de la otra área (concurso/quiebra/insolvencia → INS;
+  métodos alternativos/mediación/negociación/conflictos → MAR), manda el nombre y se avisa (`AREA_INS/AREA_MAR`
+  en pdf-oferta.js). En el área INS la única materia es 968 "Concursos"; en MAR, 7X2 "Métodos alternativos...".
+  Ojo: existe otra "Concursos" (ECN-308, Económico) que NO es la de Procesal.
 - El PDF de 2025 **no tiene columna Temática** → avisos (no errores) para los derivados de Empresarial.
 - `_ÁREA XXX` → área (no se pueden cursar dos de la misma área); `***` → orientado a investigación.
 - Python se eliminó por completo (antes había pdfplumber); el resultado de pdf.js es idéntico.
@@ -322,7 +327,7 @@ Título: "PRIMER PERÍODO LECTIVO 2026 - CPO". Actividad: `205 (PRI) - DERECHO R
 
 ```bash
 npm install
-npm test                                   # 24 tests (node --test)
+npm test                                   # 25 tests (node --test)
 npx firebase deploy --only hosting --project mi-cpo
 npx firebase deploy --only firestore:rules --project mi-cpo
 npx firebase deploy --only hosting,firestore:rules --project mi-cpo   # lo habitual
@@ -349,7 +354,7 @@ npx firebase deploy --only hosting,firestore:rules --project mi-cpo   # lo habit
 
 | Oferta | Estado | Versión | Notas |
 |---|---|---|---|
-| 2025-1 | publicada, no vigente | v-182f4fa92dfa | del PDF `CPO_1S_1_25.pdf` (= data/ofertas/2025-1.pdf), 638 materias, 1281 comisiones |
+| 2025-1 | publicada, no vigente | v-9579de42b892 | del PDF `CPO_1S_1_25.pdf` (= data/ofertas/2025-1.pdf), 638 materias, 1281 comisiones |
 | 2025-2 | publicada, no vigente | v-17fd42027dd7 | la subió el usuario desde el admin (el PDF no está en data/) |
 | 2026-1 | no vigente | v-f1df629fa1bb | del PDF data/ofertas/2026-1.pdf, 607 materias, 1227 comisiones |
 | **2026-2** | **vigente** | v-d483496fc8ae | sin PDF: tomada del fixture legacy (data/ofertas/2026-2.json). Su `estado` dice "reemplazada" (cosmético; se arregla al activarla desde /3816) |
@@ -372,6 +377,9 @@ npx firebase deploy --only hosting,firestore:rules --project mi-cpo   # lo habit
 8. Admin movido de `/admin` a **`/3816`** (pedido del usuario; la seguridad real son Auth + reglas).
    Se sacaron de la app los links "Subir oferta" y la sección "Alumnos" (ahora en /3816).
 9. Cache `no-cache` en Hosting.
+11. Tributario: Procesal pide **Concursos (INS-968)** en lugar de "cualquier curso de Insolvencia"
+    (no está en el PDF del Plan 2004; lo pidió el usuario el 13/11/2026). Se reimportó 2025-1 con el
+    arreglo de títulos cruzados (antes 968 figuraba como MAR-968 y 7X2 como INS-7X2).
 10. El progreso se queda en `plans/{uid}` separado de `users/{uid}` (privacidad: `users` lo lee
     cualquiera con sesión; costo de lecturas; escrituras independientes). El usuario lo preguntó.
 

@@ -21165,7 +21165,7 @@
    "intdp": true
   },
   {
-   "dep": "INS",
+   "dep": "MAR",
    "code": "7X2",
    "name": "MÉTODOS ALTERNATIVOS PARA EL ABORDAJE DE CONFLICTOS",
    "periods": [
@@ -21374,7 +21374,7 @@
    "intdp": false
   },
   {
-   "dep": "MAR",
+   "dep": "INS",
    "code": "968",
    "name": "CONCURSOS",
    "periods": [

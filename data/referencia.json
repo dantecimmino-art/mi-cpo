@@ -1,5 +1,5 @@
 {
-  "_doc": "Reglamento del CPO (Plan 2004, Res. CD 3798/04; ver data/reglamento/plan-2004.pdf). NO cambia entre cuatrimestres: cada oferta (PDF) se valida contra esto al importarla. materiasReglamento = materias que el plan exige por nombre, con sus puntos.",
+  "_doc": "Reglamento del CPO (Plan 2004, Res. CD 3798/04; ver data/reglamento/plan-2004.pdf). NO cambia entre cuatrimestres: cada oferta (PDF) se valida contra esto al importarla. materiasReglamento = materias que el plan exige por nombre, con sus puntos. Excepción pedida por la Secretaría (nov-2026): en Tributario, los 2 puntos de Procesal del área de Insolvencia se completan con la materia Concursos (INS-968), rol \"procesal-obligatorio\".",
   "departamentos": [
     {
       "id": "PRI",
@@ -834,6 +834,16 @@
       "rol": "comun",
       "orientaciones": [],
       "orden": 40
+    },
+    {
+      "id": "INS-968",
+      "nombre": "Concursos",
+      "puntos": 2,
+      "rol": "procesal-obligatorio",
+      "orientaciones": [
+        "tri"
+      ],
+      "orden": 41
     }
   ],
   "materiasReservadas": [

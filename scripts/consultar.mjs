@@ -66,7 +66,7 @@ if (cmd === 'materia') {
   if (!or.exists) { console.log('No existe la orientación', valor); process.exit(1); }
   // Materias que el reglamento exige para esta orientación + las comunes a todas (Integración).
   const d = or.data();
-  const ROL = { principal: 'Principal (obligatoria)', 'elegir-uno': 'Elegí una de estas', 'derivado-obligatorio': 'Derivado obligatorio', constitucional: 'Constitucional (una de estas)', comun: 'Común a todas' };
+  const ROL = { principal: 'Principal (obligatoria)', 'elegir-uno': 'Elegí una de estas', 'derivado-obligatorio': 'Derivado obligatorio', constitucional: 'Constitucional (una de estas)', comun: 'Común a todas', 'procesal-obligatorio': 'Procesal obligatorio' };
   const propias = (await db.collection('materiasReglamento').where('orientaciones', 'array-contains', valor).get()).docs;
   const comunes = (await db.collection('materiasReglamento').where('rol', '==', 'comun').get()).docs;
   const regla = [...propias, ...comunes].map(x => ({ id: x.id, ...x.data() })).sort((a, b) => a.orden - b.orden);

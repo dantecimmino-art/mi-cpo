@@ -9,7 +9,7 @@ Hablame siempre en español rioplatense.
 3. Verificá el entorno con la sección "2.b Instalación en una PC nueva" de MEMORY.md: decime qué
    programas faltan (Git, Node 22, Firebase CLI, gcloud, etc.) y guiame para instalarlos y loguearme
    (firebase login y gcloud auth application-default login con una cuenta con acceso a mi-cpo).
-4. Corré npm install y npm test (tienen que pasar 24 tests) y probá
+4. Corré npm install y npm test (tienen que pasar 25 tests) y probá
    npm run consultar -- --project mi-cpo orientacion pri para confirmar que llegás a Firestore.
 5. Contame en pocas líneas qué entendiste del proyecto (qué hace la app, cómo se sube una oferta,
    dónde se guarda el progreso de los alumnos y qué está en producción hoy) y qué pendientes ves.

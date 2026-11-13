@@ -22,6 +22,11 @@ test('el reglamento cubre todas las materias que usan las orientaciones', () => 
   }
 });
 
+test('Tributario: falta Concursos (INS-968), que va en Procesal: error', () => {
+  const e = errores(sin(o1, 'INS-968'));
+  assert.ok(e.some(m => /Falta INS-968 "Concursos" \(procesal-obligatorio de tri\)/.test(m)), e.join('\n'));
+});
+
 test('falta una principal: error', () => {
   const e = errores(sin(o1, 'PEN-405'));
   assert.equal(e.length, 1);

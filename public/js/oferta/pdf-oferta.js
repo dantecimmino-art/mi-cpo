@@ -23,6 +23,10 @@ const SECCIONES = [
   ['privado', 'PRI'],
 ];
 
+// Nombres que identifican cada área de Procesal (sobre el texto normalizado, sin acentos).
+const AREA_INS = /\b(concurso|concursos|concursal|quiebra|quiebras|insolvencia)\b/;
+const AREA_MAR = /\b(metodos alternativos|mediacion|negociacion|resolucion de conflictos|abordaje de conflictos)\b/;
+
 export function seccionADepto(texto) {
   const t = norm(texto);
   const hit = SECCIONES.find(([k]) => t.includes(k));
@@ -85,7 +89,7 @@ export function interpretar(raw, periodos, { fuente = '' } = {}) {
   const avisar = (tipo, msg, fila) => avisos.push({ tipo, msg, ...(fila ? { pagina: fila.pagina } : {}) });
 
   let depto = null, cols = null, tituloSeccion = [];
-  const filas = [];
+  const filas = [], cruzadas = new Set();
   for (const ev of raw.eventos) {
     if (ev.t === 'seccion') {
       // Los títulos largos vienen partidos en varias líneas: se acumulan hasta la próxima tabla.
@@ -102,7 +106,18 @@ export function interpretar(raw, periodos, { fuente = '' } = {}) {
     const per = periodoDe(get('periodo lectivo'), periodos);
     const act = actividadDe(get('actividad'));
     const com = get('comision');
-    const fila = { ...ev, depto, per, act, com };
+    // El PDF de 2025-1 trae cruzados los títulos de las dos áreas de Procesal (Métodos alternativos
+    // e Insolvencia): si el nombre de la materia es claramente de la otra área, manda el nombre.
+    let dep = depto;
+    if (act && (depto === 'MAR' || depto === 'INS')) {
+      const n = norm(act.name), porNombre = AREA_INS.test(n) ? 'INS' : AREA_MAR.test(n) ? 'MAR' : null;
+      if (porNombre && porNombre !== depto) {
+        dep = porNombre;
+        const k = `${act.code}|${depto}`;
+        if (!cruzadas.has(k)) { cruzadas.add(k); avisar('aviso', `${act.code} "${act.name}" está bajo el título de ${depto} pero es de ${porNombre}: se usa ${porNombre} (títulos de sección cruzados en el PDF)`, ev); }
+      }
+    }
+    const fila = { ...ev, depto: dep, per, act, com };
     if (!depto) { avisar('error', `Fila sin departamento (falta el título de sección): ${c.join(' | ')}`, ev); continue; }
     if (!per) { avisar('error', `Período desconocido "${get('periodo lectivo')}"`, ev); continue; }
     if (!act) { avisar('error', `Actividad con formato desconocido "${get('actividad')}"`, ev); continue; }
