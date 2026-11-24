@@ -312,6 +312,11 @@ tras el render; en ≤760px pasa a lista sin flechas).
   el texto del encabezado y el `<title>`. En modo CPC la barra lateral muestra solo "Mi CPC" y el
   panel el cuadro; el resto del CPO (hero, bloques, botones de plan) se oculta. Si elige CPO sin
   orientación, ve la pantalla de orientaciones (con el atajo "¿Todavía estás en el CPC?").
+- **CPC en el teléfono (≤760px, 24/11/2026)**: no se dibuja el cuadro sino una lista agrupada (`cpcMobHtml`): Para revisar,
+  Cursando, Ya podés cursar, Todavía no, y plegadas "Obligatorias del CPO, todavía no" y "Aprobadas" (`UI.cpcOpen`).
+  El círculo marca/desmarca Aprobada; el nombre (o el candado) abre la ficha `cpcSheet` (estado, qué necesita, qué
+  habilita). Mismos datos y reglas (`cpcSt`, `cpcFalta`, `setCpc`): no cambia `plans`. En PC sigue el cuadro con
+  flechas; `CPCMOB` (matchMedia) vuelve a renderizar al cambiar el ancho. CSS: clases `cm*` al final de index.html.
 - **Nombre del sistema: "Mi Carrera"** (título de la página, pantalla de ingreso "Planificá tu carrera").
 - `firestore.rules`: `plans` acepta `cpc` (map, ≤40) y `fase`.
 
@@ -429,6 +434,9 @@ npx firebase deploy --only hosting,firestore:rules --project mi-cpo   # lo habit
     cualquiera con sesión; costo de lecturas; escrituras independientes). El usuario lo preguntó.
 
 ---
+
+13. CPC en el teléfono como lista por estado + ficha (24/11/2026): el cuadro en columna era larguísimo y perdía las
+    correlatividades. Se probó antes con un prototipo.
 
 ## 12. Pendientes / ideas
 

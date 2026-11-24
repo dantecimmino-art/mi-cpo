@@ -1477,6 +1477,7 @@ function setCpc(c, st){
   else if(n>n0 && [10,11,12,14].includes(n)) toast(cpcHito(n));
 }
 function cpcHtml(){
+  if(CPCMOB.matches) return cpcMobHtml();
   const t = cpcTotals();
   let h = '<div class="cpcwrap"><div class="cpchd"><div class="cpcnum"><b class="mono">'+t.apr+'/'+t.n+'</b> materias del CPC aprobadas'+(t.cur?' · '+t.cur+' cursando':'')+' · '+t.ok+' disponible'+(t.ok===1?'':'s')+' para cursar · obligatorias del CPO: '+t.oba+'/'+t.nob+'</div>'+
     '<div class="stack" role="img" aria-label="'+t.apr+' de '+t.n+' materias del CPC aprobadas"><i class="s1" style="width:'+(100*t.apr/t.n)+'%"></i></div>'+
@@ -1553,6 +1554,82 @@ function cpcHl(c){
   g.querySelectorAll('[data-cpc]').forEach(n => { const k = n.dataset.cpc; n.classList.toggle('cme', k===c); n.classList.toggle('pre', pre.includes(k)); n.classList.toggle('nxt', nxt.includes(k)); });
   g.querySelectorAll('.cpce').forEach(e => e.classList.toggle('hl', !!c && (e.dataset.f===c || e.dataset.t===c)));
 }
+/* ----- CPC en el teléfono: lista agrupada por estado + ficha que sube desde abajo ----- */
+// Mismos datos y mismas reglas que el cuadro (cpcSt / cpcFalta / setCpc): solo cambia cómo se muestra.
+const CPCMOB = window.matchMedia('(max-width:760px)');
+CPCMOB.addEventListener('change', () => { cpcSheet(null); render(); });
+const cpcCl = m => { const s = cpcSt(m.c), f = cpcFalta(m.c); return (s==='apr' || s==='cur') && f.length ? 'bad' : s || (f.length ? 'lock' : 'ok'); };
+const CPCIC = {
+  apr:'<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  cur:'<svg viewBox="0 0 24 24"><path d="M12 7v5l3 2"/></svg>',
+  lock:'<svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"/><path d="M9 11V8a3 3 0 016 0v3"/></svg>',
+  bad:'<svg viewBox="0 0 24 24"><path d="M12 6v7M12 17v.5"/></svg>', ok:'',
+};
+function cpcRow(m){
+  const k = cpcCl(m), f = cpcFalta(m.c), s = cpcSt(m.c);
+  // En las obligatorias, las "10 materias" ya están dichas en el título del grupo.
+  const ff = f.filter(x => !/^10 materias/.test(x));
+  const sub = k==='bad' ? 'La marcaste '+(s==='apr'?'aprobada':'cursando')+' y te falta: '+f.join(', ') : k==='lock' && ff.length ? 'Te falta: '+ff.join(', ') : '';
+  const tog = k==='lock' || k==='bad' ? 'data-cpcm="'+m.c+'" aria-label="Ver '+esc(m.n)+'"' : 'data-cpcst="'+m.c+'|apr" aria-pressed="'+(s==='apr')+'" aria-label="'+esc(m.n)+': aprobada"';
+  return '<li class="cmr '+k+'"><button class="cmck" '+tog+'><i>'+CPCIC[k]+'</i></button><button class="cmt" data-cpcm="'+m.c+'"><span class="cmn">'+esc(m.n)+'</span>'+
+    (sub ? '<span class="cms">'+sub+'</span>' : m.ob && k!=='lock' ? '<span class="cms">Obligatoria del CPO</span>' : '')+'</button></li>';
+}
+function cpcMobHtml(){
+  const t = cpcTotals(), by = k => CPC.filter(m => cpcCl(m)===k);
+  const ul = l => '<ul>'+l.map(cpcRow).join('')+'</ul>';
+  const grp = (id, tit, l) => l.length ? '<section class="cmg g-'+id+'"><h3>'+tit+' <span>'+l.length+'</span></h3>'+ul(l)+'</section>' : '';
+  const plg = (id, tit, l, nota, cnt) => { if(!l.length) return ''; const op = !!(UI.cpcOpen||{})[id];
+    return '<section class="cmg g-'+id+'"><button class="cmh" data-cpcopen="'+id+'" aria-expanded="'+op+'"><span>'+tit+' <b>'+(cnt||l.length)+'</b></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>'+(op ? (nota?'<p class="cmnota">'+nota+'</p>':'')+ul(l) : '')+'</section>'; };
+  const lock = by('lock');
+  // 14 tramos; las marcas son los hitos del reglamento (10 = obligatorias del CPO, 12 = CPO).
+  let seg = ''; for(let i=1;i<=14;i++) seg += '<i class="'+(i<=t.apr?'on':'')+(i===10||i===12?' hit':'')+'"></i>';
+  return '<div class="cpcm1"><div class="cmtop"><div class="cmnum"><b>'+t.apr+'</b><span>de 14 materias aprobadas</span></div>'+
+    '<div class="cmseg" role="img" aria-label="'+t.apr+' de 14 aprobadas">'+seg+'</div>'+
+    '<div class="cmesc" aria-hidden="true"><span style="grid-column:4/11">obligatorias 10</span><span style="grid-column:11/13">12</span><span style="grid-column:13/15;justify-self:start">CPO</span></div>'+
+    '<p class="cmhito">'+esc(cpcHito(t.apr))+'</p></div>'+
+    (t.apr===0 ? '<p class="cmtip">Tocá el círculo de las que ya aprobaste. Tocá el nombre para marcarla como cursando o ver sus correlativas.</p>' : '')+
+    grp('bad','Para revisar', by('bad'))+
+    grp('cur','Cursando', by('cur'))+
+    grp('ok','Ya podés cursar', by('ok'))+
+    grp('lock','Todavía no', lock.filter(m => !m.ob))+
+    plg('ob','Obligatorias del CPO, todavía no', lock.filter(m => m.ob), t.apr<10 ? 'Se habilitan con 10 materias del CPC aprobadas (tenés '+t.apr+') y sus correlativas.' : '')+
+    plg('apr','Aprobadas', by('apr'), '', t.oba ? t.apr+' + '+t.oba+' del CPO' : '')+'</div>';
+}
+function cpcSheet(c){
+  let e = document.getElementById('cpcsheet');
+  const m = c && CPCK.get(c);
+  if(!m){ if(e){ e.remove(); document.body.classList.remove('cmlock'); const b = document.querySelector('.cmt[data-cpcm="'+UI.cpcBack+'"]'); if(b) b.focus({preventScroll:true}); } return; }
+  if(!e){ e = document.createElement('div'); e.id = 'cpcsheet'; document.body.appendChild(e); document.body.classList.add('cmlock'); UI.cpcBack = c; }
+  const s = cpcSt(c), k = cpcCl(m), req = cpcReq(c), nx = cpcNext(c), n = cpcAprN();
+  const li = x => { const q = CPCK.get(x), kk = cpcCl(q); return '<li><button data-cpcm="'+x+'" class="cml '+kk+'"><i>'+CPCIC[kk]+'</i><span>'+esc(q.n)+'</span></button></li>'; };
+  const lib = !m.ob && n>=11 && req.length;
+  const est = {apr:'Aprobada', cur:'Cursando', ok:'Ya la podés cursar', lock:'Todavía no la podés cursar', bad:'Marcada sin tener las correlativas'}[k];
+  const bt = (v, l) => '<button data-cpcset="'+c+'|'+v+'" class="b-'+(v||'no')+'" aria-pressed="'+(s===v)+'">'+l+'</button>';
+  e.innerHTML = '<div class="cmbg" data-cpcx="1"></div><div class="cmsh" role="dialog" aria-modal="true" aria-labelledby="cmst"><div class="cmgrip" aria-hidden="true"></div>'+
+    '<button class="cmx" data-cpcx="1" aria-label="Cerrar"><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg></button>'+
+    '<h2 id="cmst" tabindex="-1">'+esc(m.n)+'</h2><p class="cmest '+k+'">'+est+' · código '+m.c+(m.ob?' · obligatoria del CPO':'')+'</p>'+
+    '<div class="cmset" role="group" aria-label="Estado de la materia">'+bt('','Sin cursar')+bt('cur','Cursando')+bt('apr','Aprobada')+'</div>'+
+    '<div class="cmrel"><h3>Para cursarla necesitás</h3>'+(req.length ? '<ul>'+req.map(li).join('')+(m.ob ? '<li><div class="cml '+(n>=10?'apr':'lock')+'"><i>'+CPCIC[n>=10?'apr':'lock']+'</i><span>10 materias del CPC aprobadas (tenés '+n+')</span></div></li>' : '')+'</ul>'+(lib?'<p class="cmnota">Con 11 aprobadas ya no te exigen estas correlativas.</p>':'') : '<p class="cmnota">Nada: no tiene correlativas.</p>')+
+    (nx.length ? '<h3>Te habilita</h3><ul>'+nx.map(li).join('')+'</ul>' : '')+'</div></div>';
+  e.querySelector('#cmst').focus({preventScroll:true});
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('[data-cpcm],[data-cpcx],[data-cpcset],[data-cpcopen]'); if(!t) return;
+  if(t.dataset.cpcx) return cpcSheet(null);
+  if(t.dataset.cpcopen){ UI.cpcOpen = UI.cpcOpen || {}; UI.cpcOpen[t.dataset.cpcopen] = !UI.cpcOpen[t.dataset.cpcopen]; render(); return; }
+  if(t.dataset.cpcset){
+    const [c, v] = t.dataset.cpcset.split('|'), s = cpcSt(c);
+    if(v!==s) setCpc(c, v || s); // setCpc con el estado actual lo desmarca
+    return cpcSheet(null);
+  }
+  cpcSheet(t.dataset.cpcm);
+});
+document.addEventListener('keydown', e => {
+  const sh = document.querySelector('#cpcsheet .cmsh'); if(!sh) return;
+  if(e.key==='Escape') return cpcSheet(null);
+  if(e.key==='Tab'){ const f = [...sh.querySelectorAll('button')], a = f[0], z = f[f.length-1]; if(e.shiftKey && (document.activeElement===a || document.activeElement.id==='cmst')){ e.preventDefault(); z.focus(); } else if(!e.shiftKey && document.activeElement===z){ e.preventDefault(); a.focus(); } }
+});
+
 const cpcSoon = () => requestAnimationFrame(cpcDraw);
 document.addEventListener('mouseover', e => { if(!document.getElementById('cpcg') || !e.target.closest) return; const n = e.target.closest('[data-cpc]'); const c = n ? n.dataset.cpc : null; if(c!==UI.cpcHl) cpcHl(c); });
 document.addEventListener('focusin', e => { const n = e.target.closest && e.target.closest('[data-cpc]'); if(n) cpcHl(n.dataset.cpc); });
