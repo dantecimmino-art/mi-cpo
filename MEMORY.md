@@ -316,7 +316,8 @@ tras el render; en ≤760px pasa a lista sin flechas).
   Cursando, Ya podés cursar, Todavía no, y plegadas "Obligatorias del CPO, todavía no" y "Aprobadas" (`UI.cpcOpen`).
   El círculo marca/desmarca Aprobada; el nombre (o el candado) abre la ficha `cpcSheet` (estado, qué necesita, qué
   habilita). Mismos datos y reglas (`cpcSt`, `cpcFalta`, `setCpc`): no cambia `plans`. En PC sigue el cuadro con
-  flechas; `CPCMOB` (matchMedia) vuelve a renderizar al cambiar el ancho. CSS: clases `cm*` al final de index.html.
+  flechas; `CPCMOB` (matchMedia) vuelve a renderizar al cambiar el ancho. CSS (clases `cm*`): dentro de app.js, inyectado
+  en un `<style>`, para que no se desfase del HTML en caché (pasó el 24/11: lista sin estilos y ficha fuera de pantalla).
 - **Nombre del sistema: "Mi Carrera"** (título de la página, pantalla de ingreso "Planificá tu carrera").
 - `firestore.rules`: `plans` acepta `cpc` (map, ≤40) y `fase`.
 
