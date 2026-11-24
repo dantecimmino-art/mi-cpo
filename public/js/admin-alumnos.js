@@ -4,7 +4,7 @@
  * Alumnos: lee todos los plans/{uid} (el progreso de cada alumno) y los nombres de users/{uid}
  * (mismo uid). Para mostrar nombres de cursos y comisiones usa la foto de la oferta vigente; si un
  * curso ya no está en la oferta, usa la copia guardada en el plan (n, d, pts).
- * Avisos y fechas: config/main {banner, dates, hid}. Se guardan con merge para no tocar "hid"
+ * Avisos y fechas: config/main {banner (aviso del CPO), bannerCpc (aviso del CPC), dates, hid}. Se guardan con merge para no tocar "hid"
  * (comentarios ocultos, que se manejan desde la app).
  * Las reglas solo dejan leer los plans y escribir config/main a quien está en admins/{uid}.
  */
@@ -20,7 +20,7 @@ let db, toast, $;
 let CAT = null;          // {byKey, ORI, PERLBL, OBLIG, DEPN, ofertaId}
 let ROWS = null;         // planes de los alumnos
 let NAMES = {};          // uid -> nombre
-let CFG = { banner: null, dates: [] };
+let CFG = { banner: null, bannerCpc: null, dates: [] };
 
 export function initAlumnos(opts) { ({ db, toast } = opts); $ = id => document.getElementById(id); conectarEventos(); }
 
@@ -169,13 +169,17 @@ function csvCursos() {
 export async function cargarAvisos() {
   try {
     const s = await db.doc('config/main').get(), d = s.exists ? s.data() : {};
-    CFG = { banner: d.banner && d.banner.text ? d.banner : null, dates: Array.isArray(d.dates) ? d.dates : [] };
-  } catch (e) { CFG = { banner: null, dates: [] }; }
-  $('av-banner').value = CFG.banner ? CFG.banner.text : '';
+    const bn = k => (d[k] && d[k].text ? d[k] : null);
+    CFG = { banner: bn('banner'), bannerCpc: bn('bannerCpc'), dates: Array.isArray(d.dates) ? d.dates : [] };
+  } catch (e) { CFG = { banner: null, bannerCpc: null, dates: [] }; }
+  $('av-banner').value = '';
   pintarFechas();
 }
 function pintarFechas() {
-  $('av-actual').innerHTML = CFG.banner ? `<div class="box info"><b>Aviso publicado:</b> ${esc(CFG.banner.text)}${CFG.banner.at ? ` <span class="meta">· ${esc(new Date(CFG.banner.at).toLocaleDateString('es-AR'))}</span>` : ''}</div>` : '<p class="empty">No hay ningún aviso publicado.</p>';
+  const av = (k, quien) => CFG[k]
+    ? `<div class="box info avbox"><div><b>Aviso para el ${quien}:</b> ${esc(CFG[k].text)}${CFG[k].at ? ` <span class="meta">· ${esc(new Date(CFG[k].at).toLocaleDateString('es-AR'))}</span>` : ''}</div><button class="btn" type="button" data-avq="${k}">Quitar</button></div>`
+    : `<p class="empty">No hay aviso publicado para el ${quien}.</p>`;
+  $('av-actual').innerHTML = av('bannerCpc', 'CPC') + av('banner', 'CPO');
   $('av-fechas').innerHTML = CFG.dates.length
     ? CFG.dates.slice().sort((a, b) => (a.date < b.date ? -1 : 1)).map(x => `<li><span><b>${esc(x.label)}</b> · ${esc(fmtDate(x.date))}</span><button class="btn" type="button" data-fdel="${esc(x.id)}">Quitar</button></li>`).join('')
     : '<li class="empty">Todavía no cargaste fechas.</li>';
@@ -191,8 +195,14 @@ function conectarEventos() {
     if (t.id === 'al-reload') cargarAlumnos();
     else if (t.id === 'al-csv') csvAlumnos();
     else if (t.id === 'al-csvc') csvCursos();
-    else if (t.id === 'av-pub') { const x = $('av-banner').value.trim().slice(0, 400); guardarCfg({ banner: x ? { text: x, at: Date.now() } : null }, x ? 'Aviso publicado.' : 'Aviso quitado.'); }
-    else if (t.id === 'av-quitar') { $('av-banner').value = ''; guardarCfg({ banner: null }, 'Aviso quitado.'); }
+    else if (t.id === 'av-pub') {
+      const x = $('av-banner').value.trim().slice(0, 400), para = $('av-para').value;
+      if (!x) return toast('Escribí el texto del aviso.');
+      const a = { text: x, at: Date.now() };
+      const datos = para === 'cpc' ? { bannerCpc: a } : para === 'cpo' ? { banner: a } : { banner: a, bannerCpc: a };
+      guardarCfg(datos, 'Aviso publicado para ' + (para === 'ambos' ? 'el CPC y el CPO' : 'el ' + para.toUpperCase()) + '.').then(() => { $('av-banner').value = ''; });
+    }
+    else if (t.dataset.avq === 'banner' || t.dataset.avq === 'bannerCpc') guardarCfg({ [t.dataset.avq]: null }, 'Aviso quitado.');
     else if (t.id === 'av-add') {
       const l = $('av-dl').value.trim().slice(0, 80), d = $('av-dd').value;
       if (!l || !/^\d{4}-\d\d-\d\d$/.test(d)) return toast('Poné un nombre y una fecha.');

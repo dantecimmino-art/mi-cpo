@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fixture CPO</title>
-<meta name="description" content="Planificador del Ciclo Profesional Orientado · UBA Derecho">
+<title>Mi Carrera · UBA Derecho</title>
+<meta name="description" content="Mi Carrera: planificador del CPC y del CPO · Abogacía UBA Derecho">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 /* Concepto: tablero de puntos. Una columna con los bloques del reglamento (con su avance) y, al lado, el listado de cursos de la oferta que sirven para el bloque elegido. */
@@ -689,13 +689,120 @@ body.auth-gate #app{display:none}
 .login-err[hidden]{display:none}
 .login-fine{display:block;margin-top:22px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px;line-height:1.5}
 @media (max-width:480px){.login{place-items:start center;padding-top:24px}.login-card{padding:26px 20px;border-radius:16px}}
+/* ===== CPC: cuadro de correlatividades (compacto, entra en la pantalla) ===== */
+.cpcgate{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:14px;padding:12px 14px;border:1px dashed var(--accent);border-radius:12px;background:var(--accent-soft)}
+.cpcgate div{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 280px}
+.cpcgate span{font-size:13.5px;color:var(--muted)}
+.cpcph{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.cpcph h2{font:700 22px/1.15 var(--f-display);margin:0 0 4px;letter-spacing:-.01em}
+.cpcph .rule{font-size:13px}
+.cpcwrap{padding:10px 14px 14px}
+.gate .cpcwrap{padding:10px 0 0}
+.cpchd{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.cpcnum{font-size:13px}.cpcnum b{font-size:16px;margin-right:4px}
+.cpchd .stack{height:9px;flex:none;background:var(--surface2)}
+.cpchito{font-size:12.5px;padding:6px 10px;border-radius:9px;background:var(--surface2);border:1px solid var(--line)}
+.cpchito.ok{background:color-mix(in srgb,var(--c-apr) 12%,var(--surface));border-color:var(--c-apr)}
+.cpclg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;color:var(--muted)}
+.cpclg span{display:inline-flex;align-items:center;gap:5px}
+.cpcdot{width:11px;height:11px;border-radius:3px;display:inline-block;border:2px solid var(--line);background:var(--surface)}
+.cpcdot.apr{background:var(--c-apr);border-color:var(--c-apr)}.cpcdot.cur{background:var(--c-cur);border-color:var(--c-cur)}
+.cpcdot.ok{border-color:var(--accent)}.cpcdot.lock{border-style:dashed;opacity:.7}.cpcdot.ob{background:#111;border-color:#111}.cpcdot.bad{background:var(--bad);border-color:var(--bad)}
+.cpcinfo{display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline;min-height:38px;font-size:12px;line-height:1.35;padding:6px 10px;border-radius:9px;border:1px solid var(--line);background:var(--surface)}
+.cpcinfo .rule{font-size:12px}
+.cpcinfo b{font-size:12.5px}
+.cpcinfo span{color:var(--muted)}
+.cpcinfo .cpcwarn{color:var(--bad)}
+.cpcobt{font:600 10px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;background:var(--ink);color:var(--surface)!important;padding:1px 6px;border-radius:99px}
+.cpcscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cpcg{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));column-gap:22px;row-gap:12px;min-width:660px;padding:2px;align-items:stretch}
+.cpcsvg{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:0}
+.cpce{fill:none;stroke:var(--muted);stroke-width:1.4;opacity:.5;marker-end:url(#cpcar);transition:opacity .15s,stroke .15s}
+.cpce.ok{stroke:var(--c-apr);opacity:.75;marker-end:url(#cpcarok)}
+.cpcm{fill:var(--muted)}.cpcm.ok{fill:var(--c-apr)}.cpcm.hl{fill:var(--accent)}
+.cpcg.hov .cpce{opacity:.1}
+.cpcg.hov .cpce.hl{opacity:1;stroke:var(--accent);stroke-width:2.2;marker-end:url(#cpcarhl)}
+.cpcn{position:relative;z-index:1;overflow:hidden;display:flex;flex-direction:column;gap:3px;background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:5px 7px 6px;min-width:0;transition:opacity .15s,border-color .15s,box-shadow .15s,background .15s;outline:none;cursor:default}
+.cpcn .cpct{display:flex;justify-content:space-between;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);white-space:nowrap}
+.cpcn .cpct b{font-weight:700;color:var(--ink)}
+.cpcs{font:600 9px var(--f-mono);letter-spacing:.04em;text-transform:uppercase;padding:1px 5px;border-radius:99px;background:var(--surface2)}
+.cpcnm{font-weight:600;font-size:11.5px;line-height:1.2;overflow-wrap:break-word;hyphens:manual}
+.cpcrq{display:none;font-size:11.5px;color:var(--muted);line-height:1.3}
+.cpcb{display:flex;gap:4px;margin-top:auto}
+.cpcb .btn{flex:1 1 0;min-width:0;padding:2px 1px;font-size:10.5px;min-height:0;line-height:1.5;border-radius:7px;overflow:hidden;text-overflow:clip;white-space:nowrap}
+.cpcb .cl{display:none}
+.cpcb .btn[aria-pressed="true"][data-cpcst$="|apr"]{background:var(--c-apr);border-color:var(--c-apr);color:#fff}
+.cpcb .btn[aria-pressed="true"][data-cpcst$="|cur"]{background:var(--c-cur);border-color:var(--c-cur);color:#fff}
+.cpcn.ok{border-color:var(--accent)}
+.cpcn.ok .cpcs{background:var(--accent-soft);color:var(--accent)}
+.cpcn.lock{border-style:dashed;background:var(--surface2)}
+.cpcn.lock .cpcnm{color:var(--muted)}
+.cpcn.apr{border-color:var(--c-apr);background:color-mix(in srgb,var(--c-apr) 13%,var(--surface))}
+.cpcn.apr .cpcs{background:var(--c-apr);color:#fff}
+.cpcn.cur{border-color:var(--c-cur);background:color-mix(in srgb,var(--c-cur) 11%,var(--surface))}
+.cpcn.cur .cpcs{background:var(--c-cur);color:#fff}
+.cpcn.ob{background:#111;border-color:#111;color:#fff}
+.cpcn.ob .cpcnm,.cpcn.ob.lock .cpcnm{color:#fff}
+.cpcn.ob .cpct{color:#bbb}
+.cpcn.ob .cpcs{background:#333;color:#fff}
+.cpcn.ob.lock{border-color:#555;background:#2a2a2a}
+.cpcn.ob.ok{border-color:#fff}
+.cpcn.ob.apr{border-color:var(--c-apr);border-width:3px}
+.cpcn.ob.cur{border-color:var(--c-cur);border-width:3px}
+.cpcn.ob .btn{background:#222;color:#fff;border-color:#555}
+.cpcn.bad,.cpcn.ob.bad{border-color:var(--bad);border-width:3px;border-style:solid;background:var(--bad-soft)}
+.cpcn.bad .cpcnm{color:var(--bad)}
+.cpcn.bad .cpcs{background:var(--bad);color:#fff}
+.cpcn.ob.bad{background:#7F1D1D}
+.cpcn.ob.bad .cpcnm{color:#fff}
+.cpcalert{position:sticky;top:8px;z-index:5;margin:0 0 10px;background:var(--bad);color:#fff;border-radius:10px;padding:8px 12px;font-size:12.5px;line-height:1.4;box-shadow:0 8px 20px -10px rgba(0,0,0,.5)}
+.cpcalert b{display:block;margin-bottom:4px}
+.cpcalert ul{margin:0 0 4px;padding-left:18px}
+.cpcalert span{display:block;opacity:.9;font-size:12px}
+.cpcalink{background:none;border:0;padding:0;color:#fff;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+.cpcg.hov .cpcn{opacity:.4}
+.cpcg.hov .cpcn.cme,.cpcg.hov .cpcn.pre,.cpcg.hov .cpcn.nxt{opacity:1}
+.cpcg.hov .cpcn.cme{box-shadow:0 0 0 3px var(--accent-soft),var(--shadow)}
+.cpcg.hov .cpcn.pre{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 35%,transparent)}
+@media (max-width:760px){
+  .cpcg{display:flex;flex-direction:column;gap:8px;min-width:0}
+  .cpcsvg{display:none}
+  .cpcrq{display:block}
+  .cpcb .cl{display:inline}.cpcb .cs{display:none}
+  .cpcnm{font-size:13px}
+  .cpcb .btn{padding:5px 6px;font-size:12px}
+  .cpcinfo{display:none}
+  .cpcg.hov .cpcn{opacity:1}
+  .cpcwrap{padding:12px}
+}
+@media (prefers-reduced-motion:reduce){.cpcn,.cpce{transition:none}}
+.modesw{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 6px}
+.mswl{font:500 10.5px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.msw{display:inline-flex;background:var(--surface);border:1.5px solid var(--edge,var(--line));border-radius:12px;padding:3px;gap:3px}
+.msw button{border:0;background:transparent;border-radius:9px;padding:6px 16px;font:700 13px var(--f-display);color:var(--muted);cursor:pointer}
+.msw button[aria-pressed="true"]{background:var(--dark,#111);color:#fff}
+.msw button:not([aria-pressed="true"]):hover{background:var(--surface2)}
+.cpcside{font-size:12px;color:var(--muted);padding:6px 12px}
+.fgrid{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.fcard{gap:6px;padding:18px}
+.fmk{width:44px;height:44px;border-radius:13px;background:var(--dark,#111);color:#fff;font:700 14px var(--f-display);display:grid;place-items:center}
+.app[data-view="cpc"] #main .actions{display:none}
+/* modo CPC: más aire entre materias (la pantalla queda libre para el cuadro) */
+.app[data-view="cpc"]{max-width:1600px}
+@media (min-width:761px){
+.app[data-view="cpc"] .cpcg{column-gap:clamp(34px,4.2vw,96px);row-gap:clamp(24px,4vh,48px);min-width:720px;padding:10px 6px 14px}
+.app[data-view="cpc"] .cpcn{padding:8px 10px 9px;gap:5px}
+.app[data-view="cpc"] .cpcnm{font-size:12.5px}
+.app[data-view="cpc"] .cpcwrap{padding:14px 22px 22px}
+}
+@media (max-width:900px){.side .modesw{order:2;padding:0;margin-bottom:12px}.app[data-view="cpc"] .side .blocks{display:none}}
 </style>
 
 <main class="login" id="login" hidden aria-labelledby="login-title">
   <div class="login-card">
-    <div class="login-brand"><span class="login-mark" aria-hidden="true">CPO</span><div><b>Fixture del CPO</b><small>UBA Derecho · Plan 2004</small></div></div>
-    <h1 id="login-title">Planificá tu CPO</h1>
-    <p class="sub">Marcá los cursos de la oferta, elegí tus comisiones y mirá cuántos puntos te faltan para recibirte. Tu avance queda guardado en tu cuenta.</p>
+    <div class="login-brand"><span class="login-mark" aria-hidden="true">MC</span><div><b>Mi Carrera</b><small>Abogacía · UBA Derecho · Plan 2004</small></div></div>
+    <h1 id="login-title">Planificá tu carrera</h1>
+    <p class="sub">Del CPC al CPO: marcá tus materias, mirá las correlatividades, elegí tus comisiones y cuántos puntos te faltan para recibirte. Tu avance queda guardado en tu cuenta.</p>
     <button class="gbtn" id="login-google" type="button">
       <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
       <span>Continuar con Google</span>
@@ -707,16 +814,17 @@ body.auth-gate #app{display:none}
 
 <div class="app nosd" id="app" data-view="sum">
   <aside class="side" id="side" hidden>
-    <div class="logo"><span class="lg-mark">CPO</span><div><b>Fixture del CPO</b><small>UBA Derecho · Plan 2004</small></div></div>
+    <div class="logo"><span class="lg-mark">CPO</span><div><b>Fixture del CPO</b><small>Mi Carrera · UBA Derecho</small></div></div>
+    <div class="modesw" id="modesw"></div>
     <nav class="blocks" id="blocks" aria-label="Bloques de puntos"></nav>
     <section class="ori orib" id="ori" hidden></section>
   </aside>
   <div class="content">
     <header class="top2">
       <div>
-        <div class="eyebrow">Ciclo Profesional Orientado</div>
-        <h1 id="hello">Fixture del CPO</h1>
-        <p class="sub">Marcá los cursos de la oferta del segundo período lectivo 2026 (cuatrimestre, 3.er y 4.º bimestre), elegí la comisión en la que te anotaste y mirá cuánto te falta. Tu avance queda guardado en tu cuenta.</p>
+        <div class="eyebrow" id="eyebrow">Ciclo Profesional Orientado</div>
+        <h1 id="hello">Mi Carrera</h1>
+        <p class="sub" id="hsub">Marcá los cursos de la oferta del segundo período lectivo 2026 (cuatrimestre, 3.er y 4.º bimestre), elegí la comisión en la que te anotaste y mirá cuánto te falta. Tu avance queda guardado en tu cuenta.</p>
       </div>
       <div class="me" id="me"></div>
     </header>

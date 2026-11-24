@@ -49,7 +49,7 @@ service cloud.firestore {
     match /config/main {
       allow read: if true;
       allow write: if isAdmin()
-        && request.resource.data.keys().hasOnly(['banner', 'dates', 'hid'])
+        && request.resource.data.keys().hasOnly(['banner', 'bannerCpc', 'dates', 'hid'])
         && (request.resource.data.get('dates', []) is list && request.resource.data.get('dates', []).size() <= 30)
         && (request.resource.data.get('hid', []) is list && request.resource.data.get('hid', []).size() <= 2000);
     }
@@ -59,8 +59,9 @@ service cloud.firestore {
       allow create, update: if isOwner(uid)
         && request.resource.data.keys().hasOnly([
              'v', 'ori', 'hist', 'sel', 'prev', 'desde', 'asked', 'fav', 'goal', 'toured',
-             'prac', 'pra', 'obl', 'idi', 't', 'rev', 'got', 'apr', 'updatedAt'])
+             'prac', 'pra', 'obl', 'idi', 't', 'rev', 'got', 'apr', 'updatedAt', 'cpc', 'fase'])
         && request.resource.data.sel is map
+        && (request.resource.data.get('cpc', {}) is map && request.resource.data.get('cpc', {}).size() <= 40)
         && request.resource.data.got is number && request.resource.data.got >= 0 && request.resource.data.got <= 200;
       allow delete: if isOwner(uid);
     }

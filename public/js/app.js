@@ -22,7 +22,7 @@ const niceName = n => { const s = n.toLowerCase().replace(/(^|[\s(.:\-—\/])([a
 
 /* estado */
 const SK = 'cpo-fixture-uba-v2';
-const blank = () => ({ori:null, hist:{}, sel:{}, prac:0, pra:[], obl:[], idi:false, t:0, rev:0, prev:[], asked:false, fav:[], goal:0, toured:false, desde:''});
+const blank = () => ({ori:null, hist:{}, sel:{}, prac:0, pra:[], obl:[], idi:false, t:0, rev:0, prev:[], asked:false, fav:[], goal:0, toured:false, desde:'', cpc:{}, fase:''});
 let S = blank();
 let UI = {active:'sum', q:'', per:'', mod:'', dep:'', day:'', turno:'', doc:'', calp:'', cals:'2', of:'2', sec:{}, page:1, changing:false, carry:null, profiles:{}};
 let ENV = {mode:'load', uid:null, name:'', admin:false, status:'', ready:false};
@@ -32,7 +32,7 @@ UI.prF = {name:'', pts:4, st:'apr'};
 let CM = {status:'idle', items:[], busy:false};
 function adopt(r){
   const b = blank();
-  if(r && typeof r==='object'){ ['ori','hist','sel','prac','pra','obl','idi','t','rev','prev','asked','fav','goal','toured','desde'].forEach(k=>{ if(r[k]!==undefined && r[k]!==null) b[k]=r[k]; }); b.ori = r.ori || null; }
+  if(r && typeof r==='object'){ ['ori','hist','sel','prac','pra','obl','idi','t','rev','prev','asked','fav','goal','toured','desde','cpc','fase'].forEach(k=>{ if(r[k]!==undefined && r[k]!==null) b[k]=r[k]; }); b.ori = r.ori || null; }
   if(typeof b.sel!=='object') b.sel = {}; if(typeof b.hist!=='object') b.hist = {};
   if(!Array.isArray(b.obl)) b.obl = [];
   b.asked = !!b.asked; b.toured = !!b.toured; if(!Array.isArray(b.prev)) b.prev = [];
@@ -42,6 +42,10 @@ function adopt(r){
   b.prac = 0;
   b.prev = b.prev.filter(x => x && typeof x.name==='string' && x.pts>0 && x.b).map(x => ({id:String(x.id||newId()), b:x.b, name:x.name.slice(0,120), pts:Math.round(x.pts), year:x.year||0, dep:x.dep||'', ori:x.ori||null, src:x.src||null, k:x.k||null, of:x.of||null, p:x.p||null, tm:Array.isArray(x.tm)?x.tm:[]}));
   b.desde = /^\d{4}-[12]$/.test(b.desde) ? b.desde : '';
+  // CPC: {código: 'apr'|'cur'} y fase 'cpc' mientras el alumno todavía no eligió orientación.
+  { const c = {}; if(b.cpc && typeof b.cpc==='object') Object.keys(b.cpc).forEach(k => { if(/^\d{3}$/.test(k) && (b.cpc[k]==='apr' || b.cpc[k]==='cur')) c[k] = b.cpc[k]; }); b.cpc = c; }
+  // Ciclo que está usando: 'cpc' | 'cpo'. Vacío = todavía no se le preguntó (los que ya tenían orientación están en el CPO).
+  b.fase = b.fase==='cpc' || b.fase==='cpo' ? b.fase : (b.ori ? 'cpo' : '');
   // Un curso elegido que ya no está en la oferta vigente (cambió el cuatrimestre): si estaba
   // aprobado no se pierde, pasa a "materias anteriores" con la copia de datos guardada en el plan.
   const gone = (k, e) => !byKey.has(k) || !e || !byKey.get(k).periods.some(p=>p.id===e.p);
@@ -81,7 +85,7 @@ async function flush(){
   writing = true; const mine = S.rev;
   try{
     const n = totals();
-    const payload = JSON.parse(JSON.stringify({v:2, ori:S.ori, hist:withCopy(S.hist, true), sel:withCopy(S.sel), prev:S.prev, desde:S.desde, asked:S.asked, fav:S.fav, goal:S.goal, toured:S.toured, prac:0, pra:S.pra, obl:S.obl, idi:S.idi, t:S.t, rev:S.rev, got:n.got, apr:n.apr, updatedAt:Date.now()}));
+    const payload = JSON.parse(JSON.stringify({v:2, ori:S.ori, hist:withCopy(S.hist, true), sel:withCopy(S.sel), prev:S.prev, desde:S.desde, cpc:S.cpc, fase:S.fase, asked:S.asked, fav:S.fav, goal:S.goal, toured:S.toured, prac:0, pra:S.pra, obl:S.obl, idi:S.idi, t:S.t, rev:S.rev, got:n.got, apr:n.apr, updatedAt:Date.now()}));
     await DOC.set(payload);
     if(S.rev===mine){ dirty = false; setStatus('ok'); }
   }catch(e){ setStatus('err'); clearTimeout(timer); timer = setTimeout(flush, 5000); }
@@ -639,14 +643,33 @@ ori(){
 },
 user(){
   const e = document.getElementById('me'), first = ENV.name ? ENV.name.split(' ')[0] : '';
-  document.getElementById('hello').textContent = first ? 'Hola, '+first : 'Fixture del CPO';
+  document.getElementById('hello').textContent = first ? 'Hola, '+first : 'Mi Carrera';
   if(ENV.mode==='db') e.innerHTML = '<b>'+esc(first||'Tu cuenta')+'</b><span id="sv" class="sv">'+statusText()+'</span><button class="btn mini" data-logout="1">Salir</button>';
   else if(ENV.mode==='local') e.innerHTML = '<b>Sin cuenta conectada</b><span id="sv" class="sv warn">Se guarda solo en este navegador</span><button class="btn mini primary" data-login="1">Entrar con Google</button>';
   else e.innerHTML = '';
 },
+brand(mode){
+  const cpc = mode==='cpc', k = cpc ? 'CPC' : 'CPO', $ = id => document.getElementById(id);
+  document.querySelectorAll('.lg-mark').forEach(x => { x.textContent = k; });
+  document.querySelectorAll('.logo b').forEach(x => { x.textContent = 'Fixture del '+k; });
+  const ey = $('eyebrow'); if(ey) ey.textContent = !mode ? 'Mi Carrera · Abogacía UBA' : cpc ? 'Ciclo Profesional Común' : 'Ciclo Profesional Orientado';
+  const sb = $('hsub'); if(sb){ if(!sb.dataset.cpo) sb.dataset.cpo = sb.innerHTML; sb.innerHTML = !mode ? 'Tu fixture de la carrera de Abogacía: el CPC con sus correlatividades y el CPO con la oferta de cursos y tus puntos.' : cpc ? 'Marcá las materias del CPC que aprobaste o estás cursando y mirá cuáles podés cursar según las correlatividades. Tu avance queda guardado en tu cuenta.' : sb.dataset.cpo; }
+  const sw = $('modesw'); if(sw) sw.innerHTML = '<span class="mswl">Estoy en el</span><div class="msw" role="group" aria-label="Ciclo"><button data-fase="cpc" aria-pressed="'+cpc+'">CPC</button><button data-fase="cpo" aria-pressed="'+!cpc+'">CPO</button></div>';
+  document.title = mode ? 'Mi Carrera · Fixture del '+k : 'Mi Carrera · UBA Derecho';
+},
+ask(){
+  document.getElementById('gate').innerHTML = '<h2>¡Bienvenido/a'+(ENV.name?', '+esc(ENV.name.split(' ')[0]):'')+'!</h2><p class="rule">¿En qué parte de la carrera estás? Según lo que elijas te mostramos tu fixture. Después podés cambiar cuando quieras con el selector <b>CPC / CPO</b>.</p><div class="ogrid fgrid">'+
+    '<button class="ocard fcard" data-fase="cpc"><span class="fmk">CPC</span><span class="on">Ciclo Profesional Común</span><span class="od">Las 14 materias comunes (Teoría del Estado, Obligaciones, Contratos…) con sus correlatividades.</span></button>'+
+    '<button class="ocard fcard" data-fase="cpo"><span class="fmk">CPO</span><span class="on">Ciclo Profesional Orientado</span><span class="od">Tu orientación, los cursos de la oferta, comisiones y los 69 puntos.</span></button></div>';
+},
 gate(){
-  document.getElementById('gate').innerHTML = '<h2>¡Bienvenido/a'+(ENV.name?', '+esc(ENV.name.split(' ')[0]):'')+'!</h2><p class="rule">Para empezar, elegí la orientación que estás cursando. Es tu orientación base: más adelante podés cambiarla con un botón y lo que cargaste en la anterior queda guardado.</p><div class="ogrid">'+
+  document.getElementById('gate').innerHTML = '<h2>¡Bienvenido/a'+(ENV.name?', '+esc(ENV.name.split(' ')[0]):'')+'!</h2><p class="rule">Para empezar, elegí la orientación que estás cursando. Es tu orientación base: más adelante podés cambiarla con un botón y lo que cargaste en la anterior queda guardado.</p><div class="cpcgate"><div><b>¿Todavía estás en el CPC?</b><span>Si no llegaste al CPO, marcá las materias del Ciclo Profesional Común y mirá qué podés cursar según las correlatividades.</span></div><button class="btn primary" data-fase="cpc">Ir a mi CPC</button></div><div class="ogrid">'+
     Object.keys(ORI).map(k=>{ const o=ORI[k]; return '<button class="ocard" data-setori="'+k+'"><span class="on">'+esc(o.n)+'</span><span class="od">Derivados en '+esc(o.dd.map(d=>DEPN[d]).join(' y '))+'</span></button>'; }).join('')+'</div>';
+},
+cpcPage(){
+  const g = document.getElementById('gate');
+  g.innerHTML = '<div class="cpcph"><div><h2>Mi CPC'+(ENV.name?' · '+esc(ENV.name.split(' ')[0]):'')+'</h2><p class="rule">Ciclo Profesional Común (14 materias): marcá cada una como <b>Cursando</b> o <b>Aprobada</b>. También están las 5 obligatorias del CPO, porque se pueden empezar antes de terminar el CPC. Cuando llegues al CPO elegís tu orientación y lo que cargaste acá queda guardado (lo ves en <b>Mi CPC</b>).</p></div><button class="btn" data-fase="cpo">Ya estoy en el CPO →</button></div>'+cpcHtml();
+  cpcSoon();
 },
 modal(){
   const el = document.getElementById('modal');
@@ -890,15 +913,24 @@ function render(){
   const aid = document.activeElement && (document.activeElement.id==='q' || document.activeElement.id==='fdoc' || document.activeElement.id==='cm-q') ? document.activeElement.id : null;
   const fid = aid ? document.activeElement.selectionStart : null;
   const $ = id => document.getElementById(id);
-  const loading = ENV.mode==='load', gate = !loading && !S.ori;
-  $('app').classList.toggle('nosd', loading || gate);
+  const loading = ENV.mode==='load', ask = !loading && !S.fase, cpcM = !loading && S.fase==='cpc';
+  const gate = !loading && !ask && !cpcM && !S.ori;
+  $('app').classList.toggle('nosd', loading || ask || gate);
   BL = getBlocks(); CLK = new Set(allClashes().reduce((a,x)=>a.concat([x.a,x.b]),[]));
-  $('boot').hidden = !loading; $('gate').hidden = !gate;
-  ['hero','ori','main','side'].forEach(i => { $(i).hidden = loading || gate; }); $('stk').hidden = true;
-  R.user();
+  $('boot').hidden = !loading; $('gate').hidden = !(ask || gate);
+  ['hero','ori','main','side'].forEach(i => { $(i).hidden = loading || ask || gate; }); $('stk').hidden = true;
+  R.user(); R.brand(cpcM ? 'cpc' : (ask || loading) ? '' : 'cpo');
   if(loading){ $('total').innerHTML = ''; return; }
   const n = R.total();
-  if(gate){ R.gate(); R.modal(); return; }
+  if(ask){ R.ask(); R.modal(); cpcSoon(); return; }
+  if(gate){ R.gate(); R.modal(); cpcSoon(); return; }
+  if(cpcM){
+    $('hero').hidden = true; $('ori').hidden = true; $('app').dataset.view = 'cpc';
+    const t = cpcTotals();
+    $('blocks').innerHTML = '<button class="bk'+(t.apr===t.n?' done':'')+'" data-b="cpc" aria-current="true"><span class="nm">Mi CPC</span><span class="pt">'+(t.apr===t.n?'✓ ':'')+t.apr+'/'+t.n+'</span><span class="bar"><i style="width:'+(100*t.apr/t.n)+'%"></i></span></button><div class="note cpcside">¿Ya estás en el CPO? Cambiá arriba a <b>CPO</b> para armar tu cursada con la oferta.</div>';
+    $('panel').innerHTML = bannerHtml() + '<div class="ph"><h2>Mi CPC</h2><div class="rule">Ciclo Profesional Común (14 materias): marcá cada una como <b>Curso</b> o <b>Aprobé</b>. También están las 5 obligatorias del CPO (en negro), porque se pueden empezar antes de terminar el CPC.</div></div>' + cpcHtml();
+    R.modal(); cpcSoon(); return;
+  }
   const m = R.mot(n);
   $('pct').innerHTML = '<span>Completado</span><b>'+Math.round(100*n.got/69)+'%</b><small>'+n.got+' de 69 puntos</small>';
   $('app').dataset.view = UI.active;
@@ -910,6 +942,7 @@ function render(){
   if(UI.active!=='sum' && UI.active!=='adm' && UI.active!=='cm' && !['cal','sug','fav','shr'].includes(UI.active) && !bl(UI.active)) UI.active = 'sum';
   $('panel').innerHTML = bannerHtml() + (UI.active==='cal'||UI.active==='sum' ? '' : clashBanner()) + (UI.active==='cm' ? cmHtml() : UI.active==='cal' ? calHtml() : UI.active==='sug' ? sugHtml() : UI.active==='fav' ? favHtml() : UI.active==='shr' ? shrHtml() : UI.active==='sum' ? R.sum() : renderBlock(bl(UI.active)));
   R.modal();
+  cpcSoon();
   if(fid!==null){ const q=$(aid); if(q){ q.focus(); q.setSelectionRange(fid,fid); } }
 }
 
@@ -1130,7 +1163,7 @@ function printPlan(){
 
 
 /* ===== v15: sugeridor, armador, favoritos, metas, compartir, avisos, demanda ===== */
-let CFG = {banner:null, dates:[], hid:[]};
+let CFG = {banner:null, bannerCpc:null, dates:[], hid:[]};
 UI.sg = {mod:'', sem:'2', goal:8, days:{1:1,2:1,3:1,4:1,5:1,6:1}, turnos:{M:1,T:1,N:1}, res:null, ideas:null, ran:false};
 UI.shr = {in:'', res:null};
 const isHid = i => CFG.hid.includes(i.uid+'|'+i.id);
@@ -1138,17 +1171,21 @@ async function loadConfig(){
   if(!DBX) return;
   try{
     const sn = await DBX.doc('config/main').get(), d = sn.exists ? sn.data() : null;
-    CFG = {banner: d && d.banner && d.banner.text ? d.banner : null, dates: Array.isArray(d && d.dates) ? d.dates : [], hid: Array.isArray(d && d.hid) ? d.hid : []};
+    const bn = k => d && d[k] && d[k].text ? d[k] : null;
+    CFG = {banner: bn('banner'), bannerCpc: bn('bannerCpc'), dates: Array.isArray(d && d.dates) ? d.dates : [], hid: Array.isArray(d && d.hid) ? d.hid : []};
   }catch(e){}
   render();
 }
-async function saveConfig(){
+async function saveConfig(){ // solo guarda los comentarios ocultos (merge): los avisos y fechas los maneja /3816
   if(!DBX || !ENV.admin){ toast('Solo quien administra puede cambiar esto.'); return false; }
-  try{ await DBX.doc('config/main').set(JSON.parse(JSON.stringify(CFG))); return true; }catch(e){ toast('No se pudo guardar. Probá de nuevo.'); return false; }
+  try{ await DBX.doc('config/main').set({hid:CFG.hid}, {merge:true}); return true; }catch(e){ toast('No se pudo guardar. Probá de nuevo.'); return false; }
 }
+// Avisos de /3816: config/main.banner = para el CPO, config/main.bannerCpc = para el CPC.
+// Cada alumno ve solo el del ciclo en el que está.
 function bannerHtml(){
-  if(!CFG.banner) return '';
-  return '<div class="abanner" role="status"><b>Aviso de la Secretaría del CPO</b><p>'+esc(CFG.banner.text)+'</p>'+(CFG.banner.at?'<small>'+esc(new Date(CFG.banner.at).toLocaleDateString('es-AR'))+'</small>':'')+'</div>';
+  const cpc = S.fase==='cpc', b = cpc ? CFG.bannerCpc : CFG.banner;
+  if(!b) return '';
+  return '<div class="abanner" role="status"><b>Aviso de la Secretaría del '+(cpc?'CPC':'CPO')+'</b><p>'+esc(b.text)+'</p>'+(b.at?'<small>'+esc(new Date(b.at).toLocaleDateString('es-AR'))+'</small>':'')+'</div>';
 }
 const fmtDate = d => { const m = String(d).match(/^(\d{4})-(\d\d)-(\d\d)$/); return m ? m[3]+'/'+m[2]+'/'+m[1] : d; };
 function datesHtml(){
@@ -1359,4 +1396,174 @@ function copyPlan(){
   const fb = () => { const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); done(); }catch(e){ toast('No se pudo copiar desde acá.'); } ta.remove(); };
   if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(done, fb); } else fb();
 }
+/* ===== CPC (Ciclo Profesional Común): cuadro de correlatividades ===== */
+// Materias del CPC con su ubicación en el cuadro (columna = nivel de correlatividad, fila = altura).
+// Las 5 con `ob` NO son del CPC: son las obligatorias del CPO comunes a todas las orientaciones
+// (S.obl), que se muestran en el cuadro por sus correlativas. "Aprobada" acá y en el CPO es el mismo dato.
+const CPC = [
+  {c:'132', n:'Teoría del Estado', x:1, y:1},
+  {c:'133', n:'Derechos Humanos y Garantías', x:1, y:2},
+  {c:'131', n:'Teoría General del Derecho', x:1, y:3},
+  {c:'135', n:'Elementos del Derecho Civil', x:1, y:4},
+  {c:'144', n:'Elementos de Análisis Económico y Financiero', x:1, y:5},
+  {c:'134', n:'Elementos de Derecho Constitucional', x:2, y:1},
+  {c:'139', n:'Elementos de Derecho Penal y Procesal Penal', x:2, y:3},
+  {c:'136', n:'Obligaciones Civiles y Comerciales', x:2, y:4},
+  {c:'145', n:'Elementos del Derecho Comercial', x:2, y:5},
+  {c:'141', n:'Elementos de Derecho Administrativo', x:3, y:2},
+  {c:'138', n:'Elementos de Derecho Procesal Civil y Comercial', x:3, y:3},
+  {c:'137', n:'Contratos Civiles y Comerciales', x:3, y:4},
+  {c:'140', n:'Elementos de Derechos Reales', x:3, y:5},
+  {c:'142', n:'Elementos de Derecho del Trabajo y la Seguridad Social', x:4, y:1},
+  {c:'163', n:'Derecho Internacional Público', x:4, y:2, ob:'DIP'},
+  {c:'167', n:'Derecho de Familia y Sucesiones', x:4, y:4, ob:'DFS'},
+  {c:'162', n:'Sociedades Civiles y Comerciales', x:4, y:5, ob:'SCC'},
+  {c:'168', n:'Finanzas Públicas y Derecho Tributario', x:5, y:2, ob:'FPT'},
+  {c:'169', n:'Derecho Internacional Privado', x:5, y:4, ob:'DIPR'},
+];
+// Correlatividades: [antes, después] = para cursar "después" hay que tener aprobada "antes".
+const CPC_E = [
+  ['132','134'], ['134','142'], ['134','141'], ['134','163'], ['133','163'], ['133','141'], ['133','139'],
+  ['131','139'], ['141','168'], ['139','168'], ['135','136'], ['135','145'], ['136','141'], ['136','138'],
+  ['136','137'], ['136','140'], ['137','142'], ['137','163'], ['137','167'], ['137','162'], ['140','167'],
+  ['145','162'], ['145','169'], ['162','168'], ['167','169'],
+];
+const CPCK = new Map(CPC.map(m => [m.c, m]));
+const cpcReq = c => CPC_E.filter(e => e[1]===c).map(e => e[0]);
+const cpcNext = c => CPC_E.filter(e => e[0]===c).map(e => e[1]);
+function cpcSt(c){
+  const m = CPCK.get(c); if(!m) return '';
+  if(m.ob && S.obl.includes(m.ob)) return 'apr';
+  const v = S.cpc[c]; return m.ob ? (v==='cur' ? 'cur' : '') : (v==='apr' || v==='cur' ? v : '');
+}
+// Reglamento de correlatividades (Res. CD 4657/07 y modif.): correlativas de cada materia, y además
+//  - con 10 del CPC aprobadas se pueden cursar las 5 obligatorias del CPO (respetando sus correlativas);
+//  - con 11 aprobadas, lo que resta del CPC se cursa sin correlatividades entre ellas;
+//  - con 12 aprobadas se puede cursar el CPO (lo que falta del CPC, antes de la próxima inscripción).
+// Las 5 obligatorias son del CPO: no cuentan en las 14 del CPC.
+const CPC14 = CPC.filter(m => !m.ob);
+const cpcAprN = () => CPC14.filter(m => cpcSt(m.c)==='apr').length;
+function cpcFalta(c){
+  const m = CPCK.get(c), n = cpcAprN(), out = [];
+  if(m && !m.ob && n>=11) return out;
+  cpcReq(c).forEach(r => { if(cpcSt(r)!=='apr') out.push(esc(CPCK.get(r).n)); });
+  if(m && m.ob && n<10) out.push('10 materias del CPC aprobadas (tenés '+n+')');
+  return out;
+}
+function cpcTotals(){
+  let apr=0, cur=0, ok=0, oba=0;
+  CPC.forEach(m => { const s = cpcSt(m.c); if(s==='apr'){ if(m.ob) oba++; else apr++; } else if(s==='cur') cur++; else if(!cpcFalta(m.c).length) ok++; });
+  return {apr, cur, ok, oba, n:CPC14.length, nob:CPC.length-CPC14.length};
+}
+function cpcHito(n){
+  if(n>=14) return '¡Completaste el CPC! Te corresponde el título de Bachiller Universitario en Derecho.';
+  if(n>=12) return 'Con 12 aprobadas ya podés cursar el CPO. Ojo: las '+(14-n)+' que te faltan del CPC tenés que aprobarlas antes de la próxima inscripción a cursos regulares.';
+  if(n>=11) return 'Con 11 aprobadas, lo que te queda del CPC lo podés cursar sin respetar las correlatividades entre esas materias. Con 12 podés empezar el CPO.';
+  if(n>=10) return 'Con 10 aprobadas ya podés cursar las obligatorias del CPO (respetando sus correlativas). Con 11, lo que te queda del CPC se libera de correlatividades.';
+  return 'Te faltan '+(10-n)+' para poder empezar las obligatorias del CPO (se habilitan con 10 materias del CPC aprobadas).';
+}
+function setCpc(c, st){
+  const m = CPCK.get(c); if(!m) return;
+  const now = cpcSt(c), nx = now===st ? '' : st, n0 = cpcAprN();
+  const f = cpcFalta(c);
+  if(m.ob){
+    S.obl = S.obl.filter(x => x!==m.ob);
+    if(nx==='apr') S.obl.push(m.ob);
+    if(nx==='cur') S.cpc[c] = 'cur'; else delete S.cpc[c];
+  } else if(nx) S.cpc[c] = nx; else delete S.cpc[c];
+  save(); render();
+  const n = cpcAprN();
+  if(nx && f.length) UI.cpcHl = c; // queda en rojo y aparece el cartel fijo de correlatividades
+  else if(n>n0 && [10,11,12,14].includes(n)) toast(cpcHito(n));
+}
+function cpcHtml(){
+  const t = cpcTotals();
+  let h = '<div class="cpcwrap"><div class="cpchd"><div class="cpcnum"><b class="mono">'+t.apr+'/'+t.n+'</b> materias del CPC aprobadas'+(t.cur?' · '+t.cur+' cursando':'')+' · '+t.ok+' disponible'+(t.ok===1?'':'s')+' para cursar · obligatorias del CPO: '+t.oba+'/'+t.nob+'</div>'+
+    '<div class="stack" role="img" aria-label="'+t.apr+' de '+t.n+' materias del CPC aprobadas"><i class="s1" style="width:'+(100*t.apr/t.n)+'%"></i></div>'+
+    '<div class="cpchito'+(t.apr>=12?' ok':'')+'">'+esc(cpcHito(t.apr))+'</div>'+
+    '<div class="cpclg"><span><i class="cpcdot apr"></i>Aprobada</span><span><i class="cpcdot cur"></i>Cursando</span><span><i class="cpcdot ok"></i>Ya la podés cursar</span><span><i class="cpcdot lock"></i>Te falta algo para cursarla</span><span><i class="cpcdot ob"></i>Obligatoria del CPO</span><span><i class="cpcdot bad"></i>Marcada sin tener las correlativas</span></div>'+
+    '<div class="cpcinfo" id="cpcinfo">'+cpcInfo(UI.cpcHl)+'</div></div>';
+  h += cpcAlertHtml();
+  h += '<div class="cpcscroll"><div class="cpcg" id="cpcg"><svg class="cpcsvg" aria-hidden="true"></svg>';
+  CPC.forEach(m => {
+    const s = cpcSt(m.c), f = cpcFalta(m.c), req = cpcReq(m.c);
+    const bad = (s==='apr' || s==='cur') && f.length;
+    const cls = (bad ? 'bad ' : '') + (s==='apr' ? 'apr' : s==='cur' ? 'cur' : f.length ? 'lock' : 'ok');
+    const lbl = bad ? '⚠ Revisar' : {apr:'Aprobada', cur:'Cursando', ok:'Disponible', lock:'Bloqueada'}[cls];
+    const rq = f.length && s!=='apr' ? '<b>Te falta:</b> '+f.join(' · ') : req.length ? 'Correlativas: '+req.map(r=>esc(CPCK.get(r).n)).join(' · ') : '';
+    h += '<div class="cpcn '+cls+(m.ob?' ob':'')+'" data-cpc="'+m.c+'" tabindex="0" title="'+esc(m.n)+'" style="grid-column:'+m.x+';grid-row:'+m.y+';order:'+(m.x*10+m.y)+'">'+
+      '<div class="cpct"><span class="mono">'+m.c+'</span><span class="cpcs">'+lbl+'</span></div>'+
+      '<div class="cpcnm">'+esc(m.n)+'</div>'+
+      (rq ? '<div class="cpcrq">'+rq+'</div>' : '')+
+      '<div class="cpcb"><button class="btn mini" data-cpcst="'+m.c+'|cur" aria-pressed="'+(s==='cur')+'" title="La estoy cursando"><span class="cl">Cursando</span><span class="cs">Curso</span></button><button class="btn mini" data-cpcst="'+m.c+'|apr" aria-pressed="'+(s==='apr')+'" title="La aprobé"><span class="cl">Aprobada</span><span class="cs">Aprobé</span></button></div></div>';
+  });
+  return h + '</div></div></div>';
+}
+// Flechas: se dibujan después de pintar, midiendo las tarjetas (rutas en ángulo recto por los
+// pasillos entre columnas y filas, para no pasar por encima de otras materias).
+// Materias marcadas como cursando/aprobada sin tener las correlativas: van en rojo y en un cartel fijo.
+const cpcBad = () => CPC.filter(m => { const s = cpcSt(m.c); return (s==='apr' || s==='cur') && cpcFalta(m.c).length; });
+function cpcAlertHtml(){
+  const bad = cpcBad(); if(!bad.length) return '';
+  return '<div class="cpcalert" role="alert"><b>⚠ Correlatividades sin cumplir</b><ul>'+bad.slice(0,4).map(m => '<li><button class="cpcalink" data-cpcgo="'+m.c+'">'+esc(m.n)+'</button> ('+(cpcSt(m.c)==='apr'?'aprobada':'cursando')+'): te falta '+cpcFalta(m.c).join(' · ')+'</li>').join('')+'</ul>'+(bad.length>4?'<span>y '+(bad.length-4)+' más</span>':'')+'<span>Revisá si te faltó marcar alguna como aprobada.</span></div>';
+}
+function cpcDraw(){
+  const g = document.getElementById('cpcg'); if(!g) return;
+  const svg = g.querySelector('.cpcsvg'); if(!svg || getComputedStyle(svg).display==='none') return;
+  const gr = g.getBoundingClientRect(), R0 = {};
+  g.querySelectorAll('[data-cpc]').forEach(n => { const r = n.getBoundingClientRect(); R0[n.dataset.cpc] = {l:r.left-gr.left, r:r.right-gr.left, t:r.top-gr.top, b:r.bottom-gr.top}; });
+  const cs = getComputedStyle(g), cg = parseFloat(cs.columnGap)||48, rg = parseFloat(cs.rowGap)||28;
+  const colR = {}, colL = {}, rowT = {}, rowB = {};
+  CPC.forEach(m => { const r = R0[m.c]; if(!r) return; colR[m.x] = Math.max(colR[m.x]||0, r.r); colL[m.x] = Math.min(colL[m.x]??1e9, r.l); rowT[m.y] = Math.min(rowT[m.y]??1e9, r.t); rowB[m.y] = Math.max(rowB[m.y]||0, r.b); });
+  const lim = Math.max(2, cg/2 - 6), off = (i, k) => Math.max(-lim, Math.min(lim, (i - 3) * k));
+  const mk = (id, cl) => '<marker id="'+id+'" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="'+cl+'" d="M0,0 L10,5 L0,10 z"/></marker>';
+  let p = '<defs>'+mk('cpcar','cpcm')+mk('cpcarok','cpcm ok')+mk('cpcarhl','cpcm hl')+'</defs>';
+  CPC_E.forEach(([a, b]) => {
+    const A = CPCK.get(a), B = CPCK.get(b), ra = R0[a], rb = R0[b]; if(!ra || !rb) return;
+    const sx = ra.r, sy = (ra.t+ra.b)/2, tx = rb.l - 1, ty = (rb.t+rb.b)/2;
+    let d;
+    if(B.x===A.x+1){ const gx = (colR[A.x]+colL[B.x])/2 + off(A.y, 6); d = 'M'+sx+' '+sy+' H'+gx+' V'+ty+' H'+tx; }
+    else {
+      const g1 = (colR[A.x]+colL[A.x+1])/2 + off(A.y, 6), g2 = (colR[B.x-1]+colL[B.x])/2 + off(B.y, 5) + 3;
+      const up = B.y>1 && (ty <= sy || !rowB[B.y]);
+      const ly = (up ? rowT[B.y] - rg/2 : rowB[B.y] + rg/2) + (A.x - 2) * 4;
+      d = 'M'+sx+' '+sy+' H'+g1+' V'+ly+' H'+g2+' V'+ty+' H'+tx;
+    }
+    p += '<path class="cpce'+(cpcSt(a)==='apr'?' ok':'')+'" data-f="'+a+'" data-t="'+b+'" d="'+d+'"/>';
+  });
+  svg.setAttribute('width', g.scrollWidth); svg.setAttribute('height', g.scrollHeight);
+  svg.innerHTML = p;
+  if(UI.cpcHl) cpcHl(UI.cpcHl);
+}
+function cpcInfo(c){
+  const m = c && CPCK.get(c);
+  if(!m) return '<span class="rule">Cada flecha es una correlatividad: para cursar una materia tenés que tener aprobadas todas las que le llegan. Pasá el mouse (o tocá) una materia para ver el detalle acá.</span>';
+  const s = cpcSt(c), f = cpcFalta(c), req = cpcReq(c), nx = cpcNext(c);
+  return '<b>'+m.c+' · '+esc(m.n)+'</b>'+(m.ob?' <span class="cpcobt">Obligatoria del CPO</span>':'')+
+    '<span>'+(req.length ? 'Correlativas: '+req.map(r=>esc(CPCK.get(r).n)+(cpcSt(r)==='apr'?' ✓':'')).join(' · ') : 'Sin correlativas.')+'</span>'+
+    (f.length && s!=='apr' ? '<span class="cpcwarn">Te falta: '+f.join(' · ')+'</span>' : '')+
+    (nx.length ? '<span>Habilita: '+nx.map(r=>esc(CPCK.get(r).n)).join(' · ')+'</span>' : '');
+}
+function cpcHl(c){
+  const g = document.getElementById('cpcg'); if(!g) return;
+  UI.cpcHl = c || null;
+  const inf = document.getElementById('cpcinfo'); if(inf) inf.innerHTML = cpcInfo(UI.cpcHl);
+  g.classList.toggle('hov', !!c);
+  const pre = c ? cpcReq(c) : [], nxt = c ? cpcNext(c) : [];
+  g.querySelectorAll('[data-cpc]').forEach(n => { const k = n.dataset.cpc; n.classList.toggle('cme', k===c); n.classList.toggle('pre', pre.includes(k)); n.classList.toggle('nxt', nxt.includes(k)); });
+  g.querySelectorAll('.cpce').forEach(e => e.classList.toggle('hl', !!c && (e.dataset.f===c || e.dataset.t===c)));
+}
+const cpcSoon = () => requestAnimationFrame(cpcDraw);
+document.addEventListener('mouseover', e => { if(!document.getElementById('cpcg') || !e.target.closest) return; const n = e.target.closest('[data-cpc]'); const c = n ? n.dataset.cpc : null; if(c!==UI.cpcHl) cpcHl(c); });
+document.addEventListener('focusin', e => { const n = e.target.closest && e.target.closest('[data-cpc]'); if(n) cpcHl(n.dataset.cpc); });
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('button');
+  if(t && t.dataset.cpcgo){ cpcHl(t.dataset.cpcgo); const n = document.querySelector('[data-cpc="'+t.dataset.cpcgo+'"]'); if(n) n.scrollIntoView({block:'center', inline:'center', behavior:'smooth'}); return; }
+  if(t && t.dataset.cpcst){ const [c, st] = t.dataset.cpcst.split('|'); setCpc(c, st); return; }
+  if(t && t.dataset.fase!==undefined){ S.fase = t.dataset.fase==='cpc' ? 'cpc' : 'cpo'; if(S.fase==='cpo' && UI.active==='cpc') UI.active = 'sum'; save(); UI.cpcHl = null; render(); window.scrollTo(0, 0); return; }
+  const n = e.target.closest && e.target.closest('[data-cpc]'); if(n && !t) cpcHl(n.dataset.cpc);
+});
+{ let rt = null; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(cpcDraw, 120); }); }
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(cpcSoon);
+
 boot();

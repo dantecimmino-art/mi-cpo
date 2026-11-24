@@ -1,7 +1,7 @@
 # MEMORY.md — Fixture del CPO (mi-cpo)
 
 Memoria completa del proyecto para retomarlo desde otra PC / otra instancia de Claude Code sin
-contexto previo. Leela entera antes de tocar nada. Última actualización: 13/11/2026.
+contexto previo. Leela entera antes de tocar nada. Última actualización: 24/11/2026.
 
 ---
 
@@ -231,16 +231,21 @@ El **id del documento es el UID** de Firebase Auth en todas: no hay campo "usuar
     hist:{ emp:{...} },              // sel de orientaciones anteriores
     prev:[ {id, b, name, pts, year, dep, ori, src, k:'PRI-205', of:'2025-1', p:'PCUA', tm:[]} ], // materias anteriores (k/of/p solo si salió del buscador)
     obl:['DIP',...], pra:[{id,pts,st,name}], idi:true,
-    fav:[], goal, asked, toured, prac:0, t, rev, got, apr, updatedAt }
+    fav:[], goal, asked, toured, prac:0, t, rev, got, apr, updatedAt,
+    cpc:{'131':'apr','136':'cur'},   // materias del CPC (ver §6.6)
+    fase:'cpc'|'' }                  // 'cpc' = todavía no eligió orientación y usa la vista del CPC
   ```
 - `comments/{uid}` `{items:[...]}` (máx. 40) — comentarios sobre comisiones.
-- `config/main` `{banner:{text,at}, dates:[{id,label,date}], hid:[uid|id]}` — avisos, fechas y comentarios ocultos.
+- `config/main` `{banner:{text,at}, bannerCpc:{text,at}, dates:[{id,label,date}], hid:[uid|id]}` — avisos (`banner` = para el CPO,
+  `bannerCpc` = para el CPC; en /3816 se elige "¿Para quién?": CPO, CPC o los dos), fechas y comentarios ocultos.
+  La app muestra solo el aviso del ciclo en el que está el alumno ("Aviso de la Secretaría del CPC/CPO").
+  `saveConfig()` de la app (ocultar comentarios) guarda solo `hid` con merge.
 - `admins/{uid}` `{email, grantedAt}`.
 
 **OJO reglas (`firestore.rules`)**: `plans` usa `keys().hasOnly([...])`. **Si agregás un campo al
 plan en `app.js` (payload de `flush()`), agregalo también a la regla y desplegá reglas**, si no
 TODOS los guardados fallan ("No se pudo guardar, reintentando…"). Ya pasó con `desde`.
-Mismo criterio para `users` (`name, updatedAt`) y `config/main` (`banner, dates, hid`).
+Mismo criterio para `users` (`name, updatedAt`) y `config/main` (`banner, bannerCpc, dates, hid`).
 
 ---
 
@@ -276,6 +281,39 @@ localStorage `cpo-pasadas-v1` por versión). Elegir → período (define los pun
 Con `k`: no se puede re-elegir en la oferta vigente (`prevSame` en `canPick`), cuenta para reglas
 puntuales (Penal 5X7/5X6, temas de Empresarial) y ocupa la ranura correcta (MAR → "Métodos
 alternativos"). "¿No la encontrás? Cargala a mano" = formulario manual viejo (sin código).
+
+### 6.6 CPC (Ciclo Profesional Común) — agregado 20/11/2026
+Para alumnos que todavía no llegaron al CPO (y consulta para los del CPO). Fuente: **Res. (CD) 4657/07 "Reglamento de
+correlatividades Plan 2004"** (con modif. 5057/08 y 1470/12) y el plan de estudios (texto ordenado,
+EXP-UBA 45.501/2018). Datos en app.js: `CPC` (código, nombre, columna `x`, fila `y`) y `CPC_E`
+(pares [antes, después]); dibujo en `cpcHtml()` + `cpcDraw()` (flechas SVG en ángulo recto medidas
+tras el render; en ≤760px pasa a lista sin flechas).
+- El CPC son **14 materias** (131–145; completo = título de Bachiller Universitario en Derecho).
+  Las otras 5 del cuadro (163 DIP, 162 SCC, 167 DFS, 168 FPT, 169 DIPR, `ob`) son las
+  **obligatorias del CPO** comunes a todas las orientaciones = bloque `ob` del CPO: "Aprobada" en el
+  cuadro = estar en `S.obl` (mismo dato). "Cursando" va en `S.cpc`.
+- Correlativas (verificadas contra el reglamento, punto 1 a–n): 136←135; 134←132; 137←136; 138←136;
+  140←136; 141←133,134,136; 142←134,137; 145←135; 139←131,133; 163←133,134,137; 162←137,145;
+  167←137,140; 168←139,141,162; 169←145,167. Sin correlativas: 131, 132, 133, 135, 144.
+- Reglas por cantidad de materias del CPC aprobadas (`cpcFalta`, `cpcHito`): con **10** se pueden
+  cursar las 5 obligatorias (respetando sus correlativas; antes figuran bloqueadas); con **11** lo que
+  resta del CPC se cursa sin correlatividades entre ellas; con **12** se puede cursar el CPO (lo que
+  falta del CPC, antes de la próxima inscripción). Punto 7 (cursos de verano/invierno) no se modela.
+- Estados: Aprobada / Cursando / Disponible / Bloqueada. Marcar una bloqueada se permite, pero la
+  tarjeta queda **en rojo** ("⚠ Revisar") y arriba del cuadro aparece un cartel rojo pegado
+  (`cpcAlertHtml`, `position:sticky`) con todas las marcadas sin correlativas. Las 5 obligatorias
+  del CPO van con fondo negro y letras blancas. Tarjetas compactas (cuadro ≈600 px de alto); el
+  detalle de la materia sale en el recuadro `#cpcinfo` al pasar el mouse. Al llegar a 10/11/12/14
+  aparece un toast con el hito.
+- **Modo CPC / CPO** (`S.fase` = 'cpc' | 'cpo'; vacío = todavía no se le preguntó). Al primer ingreso
+  la app pregunta "¿En qué parte de la carrera estás?" (`R.ask`). Los planes viejos con orientación
+  quedan en 'cpo' (`adopt`). En la barra lateral, debajo del logo, está el selector **CPC | CPO**
+  (`#modesw`, `data-fase`); `R.brand()` cambia el logo (CPC/CPO), "Fixture del CPC/CPO", el eyebrow,
+  el texto del encabezado y el `<title>`. En modo CPC la barra lateral muestra solo "Mi CPC" y el
+  panel el cuadro; el resto del CPO (hero, bloques, botones de plan) se oculta. Si elige CPO sin
+  orientación, ve la pantalla de orientaciones (con el atajo "¿Todavía estás en el CPC?").
+- **Nombre del sistema: "Mi Carrera"** (título de la página, pantalla de ingreso "Planificá tu carrera").
+- `firestore.rules`: `plans` acepta `cpc` (map, ≤40) y `fase`.
 
 ### 6.5 Administración de alumnos y avisos
 `/3816#alumnos`: lee todos los `plans` + nombres de `users`, usa la foto vigente para nombres de
@@ -338,6 +376,11 @@ npx firebase deploy --only hosting,firestore:rules --project mi-cpo   # lo habit
   exportá los índices vivos (`firebase firestore:indexes`) y usá `--force` sin borrar índices.
 - Después de cambiar `public/`, siempre verificar en producción con `curl` que el archivo nuevo
   esté (por ejemplo `curl -s https://mi-cpo.web.app/js/app.js | grep -c <algo nuevo>`).
+- **Una sola carpeta de trabajo por PC.** En la PC de Dante (Windows) es `C:UsersdcimminoProyectosmi-cpo`.
+  El CPC (§6.6) se hizo y publicó el 20/11/2026 desde otra copia (`.geminiantigravityscratchmi-cpo`) sin
+  commitear; se recuperó el 24/11/2026. Esa copia quedó solo como respaldo: no usarla.
+- **Antes de empezar**: `git pull`. **Después de cada deploy**: commit y push, para que GitHub y producción no
+  se separen. `ProyectosPublicar.bat` (fuera del repo) hace pull + deploy de hosting y reglas + push.
 - **Pruebas en navegador**: se hicieron con Edge headless (`msedge --headless=new
   --user-data-dir=<perfil temporal> --remote-debugging-port=<puerto>`) contra un **Firebase falso en
   memoria** (reemplaza los `<script>` de firebase compat por un fake con `doc/collection/where/batch/
@@ -380,6 +423,8 @@ npx firebase deploy --only hosting,firestore:rules --project mi-cpo   # lo habit
 11. Tributario: Procesal pide **Concursos (INS-968)** en lugar de "cualquier curso de Insolvencia"
     (no está en el PDF del Plan 2004; lo pidió el usuario el 13/11/2026). Se reimportó 2025-1 con el
     arreglo de títulos cruzados (antes 968 figuraba como MAR-968 y 7X2 como INS-7X2).
+12. CPC (20/11/2026): cuadro de correlatividades del Ciclo Profesional Común para alumnos que
+    todavía no están en el CPO (ver §6.6). Se guarda en el mismo `plans/{uid}` (`cpc`, `fase`).
 10. El progreso se queda en `plans/{uid}` separado de `users/{uid}` (privacidad: `users` lo lee
     cualquiera con sesión; costo de lecturas; escrituras independientes). El usuario lo preguntó.
 

@@ -130,6 +130,8 @@ table.adm details .mono{color:var(--muted);font-size:12px}
 .chip.bad{background:var(--bad-soft);color:var(--bad)}
 
 /* avisos */
+.avbox{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+#av-para{font:inherit;padding:7px 10px;border-radius:8px;border:1px solid var(--line,#ddd);background:#fff}
 .lbl{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
 textarea{resize:vertical}
 .fechas li span{min-width:0}
@@ -238,13 +240,15 @@ textarea{resize:vertical}
     </div>
 
     <div id="tab-avisos" role="tabpanel" hidden>
-      <p class="sub">Lo que publiques acá lo ven todos los alumnos en la app: el aviso arriba de cada pantalla y las fechas en "Mi progreso".</p>
+      <p class="sub">Los avisos se ven arriba de la pantalla de la app: el del CPC lo ven solo los alumnos que están en el CPC y el del CPO solo los del CPO. Las fechas se ven en "Mi progreso" del CPO.</p>
       <section class="card" aria-labelledby="t-av">
-        <div class="card-h"><h2 id="t-av">Aviso general</h2></div>
+        <div class="card-h"><h2 id="t-av">Avisos</h2></div>
         <div id="av-actual"></div>
+        <label class="lbl" for="av-para">¿Para quién es el aviso?</label>
+        <select id="av-para"><option value="cpo">Alumnos del CPO</option><option value="cpc">Alumnos del CPC</option><option value="ambos">Los dos (CPC y CPO)</option></select>
         <label class="lbl" for="av-banner">Texto del aviso</label>
         <textarea id="av-banner" rows="3" maxlength="400" placeholder="Ej.: Se abrió la inscripción al segundo período. Cierra el 20/11."></textarea>
-        <div class="actions"><button class="btn primary" type="button" id="av-pub">Publicar aviso</button><button class="btn" type="button" id="av-quitar">Quitar aviso</button></div>
+        <div class="actions"><button class="btn primary" type="button" id="av-pub">Publicar aviso</button></div>
       </section>
       <section class="card" aria-labelledby="t-fe">
         <div class="card-h"><h2 id="t-fe">Fechas importantes</h2></div>
